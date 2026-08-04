@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  AcademicCapIcon,
   ArrowTopRightOnSquareIcon,
   ChartBarSquareIcon,
   DocumentTextIcon,
@@ -59,12 +58,9 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
 
   return (
     <section className="mb-5 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="mb-3 flex items-center gap-2">
-        <AcademicCapIcon className="h-5 w-5 text-accent" aria-hidden="true" />
-        <h3 className="text-sm font-semibold text-primary">
-          {isChinese ? '学术概览' : 'Academic Snapshot'}
-        </h3>
-      </div>
+      <h3 className="mb-3 font-semibold text-primary">
+        {isChinese ? '学术概览' : 'Academic Snapshot'}
+      </h3>
 
       <div className="grid grid-cols-2 gap-2.5">
         {metrics.map((metric) => {
@@ -82,7 +78,7 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
               <p className="font-serif text-2xl font-bold leading-none text-primary">
                 {metric.value}
               </p>
-              <p className="mt-1.5 text-[11px] font-medium tracking-wide text-neutral-600 dark:text-neutral-400">
+              <p className="mt-1.5 text-sm font-medium tracking-wide text-neutral-600 dark:text-neutral-400">
                 {metric.label}
               </p>
             </div>
@@ -90,7 +86,7 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
         })}
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-1 text-[10px] text-neutral-500 dark:text-neutral-400">
+      <div className="mt-3 flex items-center justify-center gap-1 text-[11px] text-neutral-500 dark:text-neutral-400">
         <span>{isChinese ? '数据统计参考' : 'Statistics referenced from'}</span>
         {scholarUrl ? (
           <a
