@@ -1,29 +1,30 @@
 [site]
-title = "Jiale Liu"
-description = "PhD student at the University of Example."
+title = "Kian Yan"
+description = "Specially Appointed Associate Researcher at the School of Future Technologies, Northeastern University."
 favicon = "/favicon.svg"
-last_updated = "November 18, 2025"
+last_updated = "August 5, 2026"
 
 [author]
-name = "Jiale Liu"
-title = "PhD Student"
-institution = "University of Example"
+name = "Kian Yan"
+publication_names = ["Qi Yan"]
+title = "Specially Appointed Associate Researcher"
+institution = "School of Future Technologies, Northeastern University"
 avatar = "/bio.jpg"
 
 [social]
 # Contact information (leave blank or delete to hide)
 
-email = "john.doe@example.com"
-location = "City, Country"
-location_url = "https://maps.google.com"
+email = "yanqi@mail.neu.edu.cn"
+location = "Shenyang, China"
+location_url = "https://maps.google.com/?q=Northeastern+University+Hunnan+Campus"
 location_details = [
-  "Room 123, Science Building,",
-  "University Avenue, City, Country"
+  "Room B424, Architecture Building,",
+  "Hunnan Campus, Northeastern University"
 ]
-google_scholar = "https://scholar.google.com"
-orcid = "https://orcid.org"
-github = "https://github.com"
-linkedin = "https://linkedin.com"
+google_scholar = "https://scholar.google.com/citations?user=DMi1YmMAAAAJ&hl=en"
+orcid = "https://orcid.org/0000-0002-8243-8633"
+github = "https://github.com/kian-qiyan"
+researchgate = "https://www.researchgate.net/profile/Qi-Yan-44"
 
 [features]
 # Show a like button on the about page
@@ -59,27 +60,3 @@ title = "Publications"
 type = "page"
 target = "publications"
 href = "/publications"
-
-[[navigation]]
-title = "Teaching"
-type = "page"
-target = "teaching"
-href = "/teaching"
-
-[[navigation]]
-title = "Awards"
-type = "page"
-target = "awards"
-href = "/awards"
-
-[[navigation]]
-title = "Services"
-type = "page"
-target = "services"
-href = "/services"
-
-[[navigation]]
-title = "CV"
-type = "page"
-target = "cv"
-href = "/cv"

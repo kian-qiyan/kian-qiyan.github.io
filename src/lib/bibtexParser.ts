@@ -133,18 +133,23 @@ function getHighlightNames(locale?: string): string[] {
     }
   };
 
-  addName(baseConfig.author.name);
+  const addAuthorNames = (config: ReturnType<typeof getConfig>) => {
+    addName(config.author.name);
+    config.author.publication_names?.forEach(addName);
+  };
+
+  addAuthorNames(baseConfig);
 
   if (runtimeI18n.enabled) {
     runtimeI18n.locales.forEach((localeCode) => {
       const localizedConfig = getConfig(localeCode);
-      addName(localizedConfig.author.name);
+      addAuthorNames(localizedConfig);
     });
   }
 
   if (locale) {
     const currentLocaleConfig = getConfig(locale);
-    addName(currentLocaleConfig.author.name);
+    addAuthorNames(currentLocaleConfig);
   }
 
   return Array.from(names);

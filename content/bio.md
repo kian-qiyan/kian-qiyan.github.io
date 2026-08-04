@@ -1,5 +1,3 @@
-I am a PhD student at the School of Science, University of Example, advised by [Prof. Advisor One](https://example.com) and [Dr. Advisor Two](https://example.com).
+I am a Specially Appointed Associate Researcher at the School of Future Technologies, Northeastern University.
 
-Prior to this, I obtained a BSc degree with First Class Honours in Natural Science from the University of Example.
-
-My current research focuses on investigating the mathematical principles of natural philosophy.
+My research focuses on intelligent scheduling and evolutionary optimization, with particular interests in dynamic optimization and learning to optimize. I develop learning-assisted optimization methods for complex production scheduling and coordinated operations and maintenance.

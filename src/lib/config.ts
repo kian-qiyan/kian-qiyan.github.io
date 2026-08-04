@@ -12,6 +12,7 @@ export interface SiteConfig {
   };
   author: {
     name: string;
+    publication_names?: string[];
     title: string;
     institution: string;
     avatar: string;
@@ -24,7 +25,7 @@ export interface SiteConfig {
     google_scholar?: string;
     orcid?: string;
     github?: string;
-    linkedin?: string;
+    researchgate?: string;
     [key: string]: string | string[] | undefined;
   };
   features: {
