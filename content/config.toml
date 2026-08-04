@@ -1,6 +1,6 @@
 [site]
 title = "Qi Yan (Kian)"
-description = "Specially Appointed Associate Researcher at the School of Future Technologies, Northeastern University."
+description = "Specially Appointed Associate Researcher at the School of Future Technologies, Northeastern University, China."
 favicon = "/favicon.svg"
 last_updated = "August 5, 2026"
 
@@ -8,7 +8,7 @@ last_updated = "August 5, 2026"
 name = "Qi Yan (Kian)"
 publication_names = ["Qi Yan"]
 title = "Specially Appointed Associate Researcher"
-institution = "School of Future Technologies, Northeastern University"
+institution = "School of Future Technologies, Northeastern University, China"
 avatar = "/bio.jpg"
 
 [social]

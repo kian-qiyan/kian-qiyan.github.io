@@ -31,7 +31,13 @@ export default function Footer({ lastUpdated, lastUpdatedByLocale, defaultLocale
               {messages.footer.builtWithPrism}
             </a>
             <span className="mx-2" aria-hidden="true">·</span>
-            <span>{messages.footer.refinedBy}</span>
+            <a
+              href="https://github.com/kian-qiyan/kian-qiyan.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {messages.footer.refinedBy}
+            </a>
             <span className="ml-2" aria-hidden="true">🚀</span>
           </p>
         </div>

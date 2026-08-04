@@ -34,6 +34,9 @@ export default function SelectedPublications({ publications, title, enableOnePag
                     {messages.home.viewAll} →
                 </Link>
             </div>
+            <p className="mb-3 text-xs text-neutral-500 dark:text-neutral-400">
+                {messages.publications.correspondingAuthor}
+            </p>
             <div className="space-y-4">
                 {publications.map((pub, index) => (
                     <motion.div
@@ -58,7 +61,7 @@ export default function SelectedPublications({ publications, title, enableOnePag
                                         {author.name}
                                     </span>
                                     {author.isCorresponding && (
-                                        <sup className={`ml-0 ${author.isHighlighted ? 'text-accent' : 'text-neutral-600 dark:text-neutral-500'}`}>†</sup>
+                                        <sup className={`ml-0 ${author.isHighlighted ? 'text-accent' : 'text-neutral-600 dark:text-neutral-500'}`}>*</sup>
                                     )}
                                     {idx < pub.authors.length - 1 && ', '}
                                 </span>
