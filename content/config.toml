@@ -27,9 +27,6 @@ github = "https://github.com/kian-qiyan"
 researchgate = "https://www.researchgate.net/profile/Qi-Yan-44"
 
 [features]
-# Show a like button on the about page
-enable_likes = true
-
 # Display all subpages on a single page
 enable_one_page_mode = false
 

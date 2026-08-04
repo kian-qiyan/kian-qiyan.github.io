@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "lxgw-wenkai-webfont/lxgwwenkai-regular.css";
+@import "lxgw-wenkai-webfont/lxgwwenkai-bold.css";
 
 /* Explicitly set dark mode to use class strategy */
 @variant dark (&:where(.dark, .dark *));
@@ -128,21 +130,21 @@
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
 
-/* Use a clean CJK sans-serif stack without affecting English typography. */
+/* Use LXGW WenKai for a warmer, bookish Chinese reading experience. */
 html[data-locale='zh'] body {
-  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
-  letter-spacing: 0;
+  font-family: "LXGW WenKai", "Kaiti SC", KaiTi, "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.012em;
 }
 
 html[data-locale='zh'] .font-serif {
-  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
-  letter-spacing: 0.01em;
+  font-family: "LXGW WenKai", "Kaiti SC", KaiTi, "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.025em;
 }
 
-/* Keep Chinese headings modern and consistent with the body typography. */
+/* Keep Chinese headings consistent with the body typography. */
 html:lang(zh),
 html[data-locale^="zh"] {
-  --font-serif: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --font-serif: "LXGW WenKai", "Kaiti SC", KaiTi, "Microsoft YaHei", sans-serif;
 }
 
 /* Dark mode styles */
