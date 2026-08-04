@@ -49,6 +49,8 @@ export interface Publication {
   awards?: string[];
   featured?: boolean;
   selected?: boolean;
+  selectedOrder?: number;
+  highlyCited?: boolean;
   preview?: string;
   summary?: string;
   researchArea: ResearchArea;

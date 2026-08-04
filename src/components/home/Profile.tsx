@@ -14,6 +14,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { Github, Pin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { useLocaleStore } from '@/lib/stores/localeStore';
 
 // Custom ORCID icon component
 const OrcidIcon = ({ className }: { className?: string }) => (
@@ -42,6 +43,8 @@ interface ProfileProps {
 
 export default function Profile({ author, social, features, researchInterests }: ProfileProps) {
     const messages = useMessages();
+    const locale = useLocaleStore((state) => state.locale);
+    const isChinese = locale === 'zh';
 
     const [hasLiked, setHasLiked] = useState(false);
     const [showThanks, setShowThanks] = useState(false);
@@ -313,9 +316,20 @@ export default function Profile({ author, social, features, researchInterests }:
             {researchInterests && researchInterests.length > 0 && (
                 <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 mb-6 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
                     <h3 className="font-semibold text-primary mb-3">{messages.profile.researchInterests}</h3>
-                    <div className="space-y-2 text-sm text-neutral-700 dark:text-neutral-500">
+                    <div className={isChinese
+                        ? 'grid grid-cols-2 gap-2 text-sm'
+                        : 'space-y-2 text-sm text-neutral-700 dark:text-neutral-500'
+                    }>
                         {researchInterests.map((interest, index) => (
-                            <div key={index}>{interest}</div>
+                            <div
+                                key={index}
+                                className={isChinese
+                                    ? 'rounded-md border border-accent/20 bg-background px-2 py-2.5 text-center font-medium tracking-[0.08em] text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-300'
+                                    : undefined
+                                }
+                            >
+                                {interest}
+                            </div>
                         ))}
                     </div>
                 </div>

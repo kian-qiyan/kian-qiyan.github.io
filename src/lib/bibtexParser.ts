@@ -59,6 +59,8 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
 
     // Parse selected field (convert string to boolean)
     const selected = tags.selected === 'true' || tags.selected === 'yes';
+    const selectedOrder = parseInt(tags.selected_order) || undefined;
+    const highlyCited = tags.highly_cited === 'true' || tags.highly_cited === 'yes';
 
     // Parse preview field (remove braces if present)
     const preview = tags.preview?.replace(/[{}]/g, '');
@@ -90,10 +92,12 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
       abstract: cleanBibTeXString(tags.abstract),
       description: cleanBibTeXString(tags.description || tags.note),
       selected,
+      selectedOrder,
+      highlyCited,
       preview,
 
       // Store original BibTeX (excluding custom fields)
-      bibtex: reconstructBibTeX(entry, ['selected', 'preview', 'description', 'keywords', 'code']),
+      bibtex: reconstructBibTeX(entry, ['selected', 'selected_order', 'highly_cited', 'preview', 'description', 'keywords', 'code']),
     };
 
     // Clean up undefined fields

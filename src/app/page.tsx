@@ -41,7 +41,9 @@ function processSections(sections: SectionConfig[], locale?: string): SectionCon
         const bibtex = getBibtexContent('publications.bib', locale);
         const allPubs = parseBibTeX(bibtex, locale);
         const filteredPubs = section.filter === 'selected'
-          ? allPubs.filter((p) => p.selected)
+          ? allPubs
+              .filter((p) => p.selected)
+              .sort((a, b) => (a.selectedOrder ?? Number.MAX_SAFE_INTEGER) - (b.selectedOrder ?? Number.MAX_SAFE_INTEGER))
           : allPubs;
         return {
           ...section,
