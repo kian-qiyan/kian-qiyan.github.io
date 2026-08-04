@@ -31,10 +31,10 @@ const OrcidIcon = ({ className }: { className?: string }) => (
 const ResearchGateIcon = ({ className }: { className?: string }) => (
     <span
         aria-hidden="true"
-        className={`${className || ''} relative inline-flex items-center justify-center rounded-[4px] bg-[#00ccbb] text-white shadow-sm`}
+        className={`${className || ''} relative inline-flex items-center justify-center text-current`}
     >
-        <span className="text-[12px] font-bold leading-none tracking-[-0.08em]">R</span>
-        <span className="absolute right-[2px] top-[1px] text-[6px] font-bold leading-none">G</span>
+        <span className="text-[15px] font-bold leading-none tracking-[-0.08em]">R</span>
+        <span className="absolute right-0 top-0 text-[6px] font-bold leading-none">G</span>
     </span>
 );
 
@@ -88,34 +88,42 @@ export default function Profile({ author, social, features, researchInterests }:
             href: `mailto:${social.email}`,
             icon: EnvelopeIcon,
             isEmail: true,
+            colorClass: 'bg-sky-50 text-sky-600 hover:bg-sky-100 dark:bg-sky-950/40 dark:text-sky-400 dark:hover:bg-sky-900/50',
         }] : []),
         ...(social.location || social.location_details ? [{
             name: messages.profile.location,
             href: social.location_url || '#',
             icon: MapPinIcon,
             isLocation: true,
+            colorClass: 'bg-rose-50 text-rose-500 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/50',
         }] : []),
         ...(social.google_scholar ? [{
             name: 'Google Scholar',
             href: social.google_scholar,
             icon: AcademicCapIcon,
+            colorClass: 'bg-blue-50 text-[#4285f4] hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/50',
         }] : []),
         ...(social.orcid ? [{
             name: 'ORCID',
             href: social.orcid,
             icon: OrcidIcon,
+            colorClass: 'bg-lime-50 text-[#8fb52c] hover:bg-lime-100 dark:bg-lime-950/40 dark:text-[#a6ce39] dark:hover:bg-lime-900/50',
         }] : []),
         ...(social.github ? [{
             name: 'GitHub',
             href: social.github,
             icon: Github,
+            colorClass: 'bg-slate-100 text-[#24292f] hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700',
         }] : []),
         ...(social.researchgate ? [{
             name: 'ResearchGate',
             href: social.researchgate,
             icon: ResearchGateIcon,
+            colorClass: 'bg-teal-50 text-[#00a99d] hover:bg-teal-100 dark:bg-teal-950/40 dark:text-[#00ccbb] dark:hover:bg-teal-900/50',
         }] : []),
     ];
+
+    const socialButtonClass = 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40';
 
     return (
         <motion.div
@@ -150,7 +158,7 @@ export default function Profile({ author, social, features, researchInterests }:
             </div>
 
             {/* Contact Links */}
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-6 relative px-2">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-6 relative px-2">
                 {socialLinks.map((link) => {
                     const IconComponent = link.icon;
                     if (link.isLocation) {
@@ -167,10 +175,7 @@ export default function Profile({ author, social, features, researchInterests }:
                                         setShowAddress(!isAddressPinned);
                                         setLastClickedTooltip('address');
                                     }}
-                                    className={`p-2 sm:p-2 transition-colors duration-200 ${isAddressPinned
-                                        ? 'text-accent'
-                                        : 'text-neutral-600 dark:text-neutral-400 hover:text-accent'
-                                        }`}
+                                    className={`${socialButtonClass} ${link.colorClass} ${isAddressPinned ? 'ring-2 ring-current/20' : ''}`}
                                     aria-label={link.name}
                                 >
                                     {isAddressPinned ? (
@@ -244,10 +249,7 @@ export default function Profile({ author, social, features, researchInterests }:
                                         setShowEmail(!isEmailPinned);
                                         setLastClickedTooltip('email');
                                     }}
-                                    className={`p-2 sm:p-2 transition-colors duration-200 ${isEmailPinned
-                                        ? 'text-accent'
-                                        : 'text-neutral-600 dark:text-neutral-400 hover:text-accent'
-                                        }`}
+                                    className={`${socialButtonClass} ${link.colorClass} ${isEmailPinned ? 'ring-2 ring-current/20' : ''}`}
                                     aria-label={link.name}
                                 >
                                     {isEmailPinned ? (
@@ -307,7 +309,7 @@ export default function Profile({ author, social, features, researchInterests }:
                             href={link.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 sm:p-2 text-neutral-600 dark:text-neutral-400 hover:text-accent transition-colors duration-200"
+                            className={`${socialButtonClass} ${link.colorClass}`}
                             aria-label={link.name}
                         >
                             <IconComponent className="h-5 w-5" />
