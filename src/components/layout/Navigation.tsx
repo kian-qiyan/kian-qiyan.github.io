@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Disclosure } from '@headlessui/react';
@@ -17,6 +18,7 @@ import type { I18nRuntimeConfig } from '@/types/i18n';
 interface NavigationProps {
   items: SiteConfig['navigation'];
   siteTitle: string;
+  siteIcon?: string;
   enableOnePageMode?: boolean;
   i18n: I18nRuntimeConfig;
   itemsByLocale?: Record<string, SiteConfig['navigation']>;
@@ -26,6 +28,7 @@ interface NavigationProps {
 export default function Navigation({
   items,
   siteTitle,
+  siteIcon,
   enableOnePageMode,
   i18n,
   itemsByLocale,
@@ -181,9 +184,19 @@ export default function Navigation({
                 >
                   <Link
                     href="/"
-                    className="text-xl lg:text-2xl font-serif font-semibold text-primary hover:text-accent transition-colors duration-200"
+                    className="flex items-center gap-2.5 text-xl lg:text-2xl font-serif font-semibold text-primary hover:text-accent transition-colors duration-200"
                   >
-                    {effectiveSiteTitle}
+                    {siteIcon && (
+                      <Image
+                        src={siteIcon}
+                        alt="Northeastern University logo"
+                        width={44}
+                        height={44}
+                        priority
+                        className="h-9 w-9 shrink-0 object-contain lg:h-11 lg:w-11"
+                      />
+                    )}
+                    <span>{effectiveSiteTitle}</span>
                   </Link>
                 </motion.div>
 

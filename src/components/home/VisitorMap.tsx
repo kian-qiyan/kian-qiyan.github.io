@@ -3,23 +3,6 @@
 import { MapIcon } from '@heroicons/react/24/outline';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 
-const widgetDocument = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <base target="_blank" />
-  <style>
-    html, body { margin: 0; min-height: 100%; background: transparent; }
-    body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    img, canvas, svg { max-width: 100% !important; height: auto !important; }
-  </style>
-</head>
-<body>
-  <script type="text/javascript" id="mapmyvisitors" src="https://mapmyvisitors.com/map.js?d=zSEcLqTW75nSzV0_-inTbKuZ9KaNQBAj1OwX532dGgA&cl=ffffff&w=a"></script>
-</body>
-</html>`;
-
 export default function VisitorMap() {
   const locale = useLocaleStore((state) => state.locale);
   const isChinese = locale === 'zh';
@@ -45,11 +28,10 @@ export default function VisitorMap() {
       <div className="mx-3 mb-2 overflow-hidden rounded-lg bg-white dark:bg-neutral-950">
         <iframe
           title={isChinese ? '全球访客位置与访问统计' : 'Global visitor locations and visit statistics'}
-          srcDoc={widgetDocument}
+          src="/visitor-map.html"
           className="block h-52 w-full border-0"
-          loading="lazy"
+          loading="eager"
           referrerPolicy="strict-origin-when-cross-origin"
-          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
         />
       </div>
 

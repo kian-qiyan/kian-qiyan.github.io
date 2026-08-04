@@ -6,7 +6,7 @@ import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 
-const counterUrl = 'https://api.counterapi.dev/v1/kianqiyan/profilelikes';
+const counterUrl = 'https://counterapi.com/api/kian-qiyan.github.io/like/profile';
 const storageKey = 'kian-profile-liked-v2';
 
 function readCount(payload: unknown): number | null {
@@ -36,11 +36,7 @@ export default function GlobalLikeButton() {
 
     const loadCount = async () => {
       try {
-        const response = await fetch(counterUrl, { cache: 'no-store' });
-        if (response.status === 400 || response.status === 404) {
-          setCount(0);
-          return;
-        }
+        const response = await fetch(`${counterUrl}?readOnly=true&behavior=vote`, { cache: 'no-store' });
         if (!response.ok) throw new Error('Unable to load like count');
 
         const nextCount = readCount(await response.json());
@@ -59,7 +55,7 @@ export default function GlobalLikeButton() {
 
     setIsUpdating(true);
     try {
-      const response = await fetch(`${counterUrl}/up`, { cache: 'no-store' });
+      const response = await fetch(`${counterUrl}?behavior=vote`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Unable to update like count');
 
       const nextCount = readCount(await response.json());

@@ -171,6 +171,7 @@ export default function RootLayout({
             <Navigation
               items={config.navigation}
               siteTitle={config.site.title}
+              siteIcon={config.site.favicon}
               enableOnePageMode={config.features.enable_one_page_mode}
               i18n={runtimeI18n}
               itemsByLocale={navigationByLocale}
