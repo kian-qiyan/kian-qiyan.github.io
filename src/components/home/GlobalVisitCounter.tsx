@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 
-const counterUrl = 'https://counterapi.com/api/kian-qiyan.github.io/view/home';
-const sessionKey = 'kian-home-visit-counted-v1';
+const counterUrl = 'https://api.counterapi.dev/v1/kian-qiyan/home-visits';
+const sessionKey = 'kian-home-visit-counted-v2';
 let visitRequest: Promise<number> | null = null;
 
 function readCount(payload: unknown): number | null {
@@ -26,7 +26,7 @@ function requestVisitCount() {
   if (visitRequest) return visitRequest;
 
   const hasCounted = sessionStorage.getItem(sessionKey) === 'true';
-  const url = hasCounted ? `${counterUrl}?readOnly=true` : counterUrl;
+  const url = hasCounted ? `${counterUrl}/` : `${counterUrl}/up`;
 
   if (!hasCounted) sessionStorage.setItem(sessionKey, 'true');
 
