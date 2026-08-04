@@ -30,7 +30,9 @@ export default function Footer({ lastUpdated, lastUpdatedByLocale, defaultLocale
             <a href="https://github.com/xyjoey/PRISM" target="_blank" rel="noopener noreferrer">
               {messages.footer.builtWithPrism}
             </a>
-            <span className="ml-2">🚀</span>
+            <span className="mx-2" aria-hidden="true">·</span>
+            <span>{messages.footer.refinedBy}</span>
+            <span className="ml-2" aria-hidden="true">🚀</span>
           </p>
         </div>
       </div>

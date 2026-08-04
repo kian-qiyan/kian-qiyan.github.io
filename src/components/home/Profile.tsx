@@ -29,8 +29,12 @@ const OrcidIcon = ({ className }: { className?: string }) => (
 );
 
 const ResearchGateIcon = ({ className }: { className?: string }) => (
-    <span className={`${className || ''} inline-flex items-center justify-center text-[10px] font-bold tracking-tight`}>
-        RG
+    <span
+        aria-hidden="true"
+        className={`${className || ''} relative inline-flex items-center justify-center rounded-[4px] bg-[#00ccbb] text-white shadow-sm`}
+    >
+        <span className="text-[12px] font-bold leading-none tracking-[-0.08em]">R</span>
+        <span className="absolute right-[2px] top-[1px] text-[6px] font-bold leading-none">G</span>
     </span>
 );
 
