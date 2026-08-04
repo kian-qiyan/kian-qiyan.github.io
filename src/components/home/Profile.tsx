@@ -13,7 +13,7 @@ import { Github, Pin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { useLocaleStore } from '@/lib/stores/localeStore';
-import VisitorMap from '@/components/home/VisitorMap';
+import AcademicSnapshot from '@/components/home/AcademicSnapshot';
 import GlobalLikeButton from '@/components/home/GlobalLikeButton';
 
 // Custom ORCID icon component
@@ -314,7 +314,7 @@ export default function Profile({ author, social, researchInterests }: ProfilePr
                 </div>
             )}
 
-            <VisitorMap />
+            <AcademicSnapshot scholarUrl={social.google_scholar} />
             <GlobalLikeButton />
 
         </motion.div>
