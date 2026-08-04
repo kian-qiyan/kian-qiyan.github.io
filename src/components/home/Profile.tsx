@@ -15,6 +15,7 @@ import { useMessages } from '@/lib/i18n/useMessages';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 import AcademicSnapshot from '@/components/home/AcademicSnapshot';
 import GlobalLikeButton from '@/components/home/GlobalLikeButton';
+import GlobalVisitCounter from '@/components/home/GlobalVisitCounter';
 
 // Custom ORCID icon component
 const OrcidIcon = ({ className }: { className?: string }) => (
@@ -315,7 +316,10 @@ export default function Profile({ author, social, researchInterests }: ProfilePr
             )}
 
             <AcademicSnapshot scholarUrl={social.google_scholar} />
-            <GlobalLikeButton />
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                <GlobalLikeButton />
+                <GlobalVisitCounter />
+            </div>
 
         </motion.div>
     );

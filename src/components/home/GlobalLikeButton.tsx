@@ -70,7 +70,7 @@ export default function GlobalLikeButton() {
   };
 
   return (
-    <div className="mt-4 flex justify-center">
+    <div className="flex justify-center">
       <motion.button
         type="button"
         onClick={handleLike}
