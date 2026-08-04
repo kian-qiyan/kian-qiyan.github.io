@@ -1,4 +1,4 @@
 type = "publication"
 title = "Publications"
-description = "A collection of my research work."
+description = "Peer-reviewed work on intelligent scheduling, evolutionary optimization, dynamic optimization, and learning to optimize."
 source = "publications.bib"

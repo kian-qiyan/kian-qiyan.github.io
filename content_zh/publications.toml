@@ -1,4 +1,4 @@
 type = "publication"
 title = "论文"
-description = "我的研究成果列表。"
+description = "围绕智能调度、进化优化、动态优化与学习优化的同行评审研究成果。"
 source = "publications.bib"
