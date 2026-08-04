@@ -227,7 +227,11 @@ export default function PublicationsList({ config, publications, embedded = fals
                                                     {author.name}
                                                 </span>
                                                 {author.isCorresponding && (
-                                                    <sup className={`ml-0 ${author.isHighlighted ? 'text-accent' : 'text-neutral-600 dark:text-neutral-400'}`}>*</sup>
+                                                    <span
+                                                        aria-label={messages.publications.correspondingAuthor}
+                                                        title={messages.publications.correspondingAuthor}
+                                                        className="ml-0.5 font-bold text-rose-600 dark:text-rose-400"
+                                                    >*</span>
                                                 )}
                                                 {idx < pub.authors.length - 1 && ', '}
                                             </span>

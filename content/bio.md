@@ -1,3 +1,5 @@
-I am a Specially Appointed Associate Researcher at the School of Future Technologies, Northeastern University, China.
+I am a Specially Appointed Associate Research Fellow at the School of Future Technologies, Northeastern University, and a postdoctoral researcher in Computer Science and Technology, working with Academician Tianyou Chai and Professor Jinliang Ding.
 
-My research focuses on intelligent scheduling and evolutionary optimization, with particular interests in dynamic optimization and learning to optimize. I develop learning-assisted optimization methods for complex production scheduling and coordinated operations and maintenance.
+I received my Ph.D. in Control Science and Engineering from the College of Information Science and Engineering at Northeastern University under the supervision of Professor Hongfeng Wang. During my doctoral studies, I was selected for a joint doctoral training program sponsored by the China Scholarship Council (CSC) and spent one year at De Montfort University in the United Kingdom. There, under the supervision of Professor Shengxiang Yang, I conducted research on evolutionary computation and its applications to shop floor scheduling.
+
+My research interests include swarm intelligence optimization, reinforcement learning, complex task scheduling, and dynamic optimization. I focus on developing intelligent modeling and optimization methods for complex systems, including manufacturing and transportation. To date, I have published more than ten papers in leading peer-reviewed journals and conference proceedings.

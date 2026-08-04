@@ -128,21 +128,21 @@
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
 
-/* Use native CJK fonts for clearer Chinese text without affecting English typography. */
+/* Use a clean CJK sans-serif stack without affecting English typography. */
 html[data-locale='zh'] body {
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-  letter-spacing: 0.01em;
+  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  letter-spacing: 0;
 }
 
 html[data-locale='zh'] .font-serif {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  letter-spacing: 0.025em;
+  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  letter-spacing: 0.01em;
 }
 
-/* Use Source Han Serif for Chinese headings/title text via .font-serif */
+/* Keep Chinese headings modern and consistent with the body typography. */
 html:lang(zh),
 html[data-locale^="zh"] {
-  --font-serif: "Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+  --font-serif: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
 }
 
 /* Dark mode styles */
