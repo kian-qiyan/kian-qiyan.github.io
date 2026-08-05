@@ -21,10 +21,6 @@ export interface LocaleMessages {
     googleMap: string;
     send: string;
     sendEmail: string;
-    education: string;
-    gpa: string;
-    supervisor: string;
-    supervisors: string;
     researchInterests: string;
   };
   home: {
@@ -80,10 +76,6 @@ const en: LocaleMessages = {
     googleMap: 'Google Map',
     send: 'Send',
     sendEmail: 'Send Email',
-    education: 'Education',
-    gpa: 'GPA',
-    supervisor: 'Supervisor',
-    supervisors: 'Supervisors',
     researchInterests: 'Research Interests',
   },
   home: {
@@ -139,10 +131,6 @@ const zh: LocaleMessages = {
     googleMap: '谷歌地图',
     send: '发送',
     sendEmail: '发送邮件',
-    education: '教育经历',
-    gpa: 'GPA',
-    supervisor: '导师',
-    supervisors: '导师',
     researchInterests: '研究兴趣',
   },
   home: {

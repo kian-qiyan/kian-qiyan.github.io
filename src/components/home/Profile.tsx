@@ -16,8 +16,6 @@ import { useLocaleStore } from '@/lib/stores/localeStore';
 import AcademicSnapshot from '@/components/home/AcademicSnapshot';
 import GlobalLikeButton from '@/components/home/GlobalLikeButton';
 import GlobalVisitCounter from '@/components/home/GlobalVisitCounter';
-import Education from '@/components/home/Education';
-import type { EducationItem } from '@/types/education';
 
 // Custom ORCID icon component
 const OrcidIcon = ({ className }: { className?: string }) => (
@@ -44,11 +42,10 @@ const ResearchGateIcon = ({ className }: { className?: string }) => (
 interface ProfileProps {
     author: SiteConfig['author'];
     social: SiteConfig['social'];
-    education?: EducationItem[];
     researchInterests?: string[];
 }
 
-export default function Profile({ author, social, education, researchInterests }: ProfileProps) {
+export default function Profile({ author, social, researchInterests }: ProfileProps) {
     const messages = useMessages();
     const locale = useLocaleStore((state) => state.locale);
     const isChinese = locale === 'zh';
@@ -293,8 +290,6 @@ export default function Profile({ author, social, education, researchInterests }
                     );
                 })}
             </div>
-
-            {education && education.length > 0 && <Education items={education} />}
 
             {/* Research Interests */}
             {researchInterests && researchInterests.length > 0 && (

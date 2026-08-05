@@ -11,7 +11,6 @@ import type { SiteConfig } from '@/lib/config';
 import { Publication } from '@/types/publication';
 import { CardPageConfig, PublicationPageConfig, TextPageConfig } from '@/types/page';
 import { useLocaleStore } from '@/lib/stores/localeStore';
-import type { EducationItem } from '@/types/education';
 
 interface SectionConfig {
   id: string;
@@ -35,7 +34,6 @@ export interface HomePageLocaleData {
   author: SiteConfig['author'];
   social: SiteConfig['social'];
   enableOnePageMode?: boolean;
-  education?: EducationItem[];
   researchInterests?: string[];
   pagesToShow: PageData[];
 }
@@ -61,7 +59,6 @@ export default function HomePageClient({ dataByLocale, defaultLocale }: HomePage
           <Profile
             author={data.author}
             social={data.social}
-            education={data.education}
             researchInterests={data.researchInterests}
           />
         </div>
