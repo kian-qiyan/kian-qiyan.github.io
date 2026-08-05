@@ -33,7 +33,10 @@ export interface LocaleMessages {
     searchPlaceholder: string;
     filters: string;
     year: string;
+    fromYear: string;
+    toYear: string;
     type: string;
+    sortBy: string;
     noResults: string;
     abstract: string;
     expandAbstract: string;
@@ -85,7 +88,10 @@ const en: LocaleMessages = {
     searchPlaceholder: 'Search publications...',
     filters: 'Filters',
     year: 'Year',
+    fromYear: 'From',
+    toYear: 'To',
     type: 'Type',
+    sortBy: 'Sort by',
     noResults: 'No publications found matching your criteria.',
     abstract: 'Abstract',
     expandAbstract: 'Expand abstract',
@@ -137,7 +143,10 @@ const zh: LocaleMessages = {
     searchPlaceholder: '搜索论文...',
     filters: '筛选',
     year: '年份',
+    fromYear: '起始年份',
+    toYear: '结束年份',
     type: '类型',
+    sortBy: '排序方式',
     noResults: '没有找到符合条件的论文。',
     abstract: '摘要',
     expandAbstract: '展开摘要',

@@ -8,6 +8,7 @@ import {
     FunnelIcon,
     CalendarIcon,
     BookOpenIcon,
+    ArrowsUpDownIcon,
     ClipboardDocumentIcon,
     ChevronDownIcon,
     ArrowTopRightOnSquareIcon
@@ -25,40 +26,111 @@ interface PublicationsListProps {
     embedded?: boolean;
 }
 
+type SortOption = 'year' | 'if' | 'jcr' | 'ccf' | 'ajg';
+
+const sortOptions: Array<{ value: SortOption; label: string }> = [
+    { value: 'year', label: 'Year' },
+    { value: 'if', label: 'IF' },
+    { value: 'jcr', label: 'JCR' },
+    { value: 'ccf', label: 'CCF' },
+    { value: 'ajg', label: 'AJG' },
+];
+
+const jcrScores: Record<NonNullable<Publication['jcrQuartile']>, number> = {
+    Q1: 4,
+    Q2: 3,
+    Q3: 2,
+    Q4: 1,
+};
+
+const ccfScores: Record<NonNullable<Publication['ccfRank']>, number> = {
+    A: 3,
+    B: 2,
+    C: 1,
+};
+
+const ajgScores: Record<NonNullable<Publication['ajgRank']>, number> = {
+    '4*': 5,
+    '4': 4,
+    '3': 3,
+    '2': 2,
+    '1': 1,
+};
+
+function parseYearInput(value: string): number | null {
+    return /^\d{4}$/.test(value) ? Number(value) : null;
+}
+
+function getSortScore(publication: Publication, sortOption: SortOption): number | undefined {
+    switch (sortOption) {
+        case 'if':
+            return publication.impactFactor;
+        case 'jcr':
+            return publication.jcrQuartile ? jcrScores[publication.jcrQuartile] : undefined;
+        case 'ccf':
+            return publication.ccfRank ? ccfScores[publication.ccfRank] : undefined;
+        case 'ajg':
+            return publication.ajgRank ? ajgScores[publication.ajgRank] : undefined;
+        default:
+            return publication.year;
+    }
+}
+
 export default function PublicationsList({ config, publications, embedded = false }: PublicationsListProps) {
     const messages = useMessages();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
+    const [startYear, setStartYear] = useState('');
+    const [endYear, setEndYear] = useState('');
     const [selectedType, setSelectedType] = useState<string | 'all'>('all');
+    const [sortOption, setSortOption] = useState<SortOption>('year');
     const [expandedBibtexId, setExpandedBibtexId] = useState<string | null>(null);
     const [expandedAbstractId, setExpandedAbstractId] = useState<string | null>(null);
-
-    // Extract unique years and types for filters
-    const years = useMemo(() => {
-        const uniqueYears = Array.from(new Set(publications.map(p => p.year)));
-        return uniqueYears.sort((a, b) => b - a);
-    }, [publications]);
 
     const types = useMemo(() => {
         const uniqueTypes = Array.from(new Set(publications.map(p => p.type)));
         return uniqueTypes.sort();
     }, [publications]);
 
-    // Filter publications
+    // Filter and sort publications while preserving the source order for exact ties.
     const filteredPublications = useMemo(() => {
-        return publications.filter(pub => {
-            const matchesSearch =
-                pub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                pub.authors.some(author => author.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                pub.journal?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                pub.conference?.toLowerCase().includes(searchQuery.toLowerCase());
+        const normalizedSearch = searchQuery.trim().toLowerCase();
+        const parsedStartYear = parseYearInput(startYear);
+        const parsedEndYear = parseYearInput(endYear);
+        const lowerYear = parsedStartYear !== null && parsedEndYear !== null
+            ? Math.min(parsedStartYear, parsedEndYear)
+            : parsedStartYear;
+        const upperYear = parsedStartYear !== null && parsedEndYear !== null
+            ? Math.max(parsedStartYear, parsedEndYear)
+            : parsedEndYear;
 
-            const matchesYear = selectedYear === 'all' || pub.year === selectedYear;
+        return publications.map((publication, sourceIndex) => ({ publication, sourceIndex })).filter(({ publication: pub }) => {
+            const matchesSearch =
+                pub.title.toLowerCase().includes(normalizedSearch) ||
+                pub.authors.some(author => author.name.toLowerCase().includes(normalizedSearch)) ||
+                pub.journal?.toLowerCase().includes(normalizedSearch) ||
+                pub.conference?.toLowerCase().includes(normalizedSearch);
+
+            const matchesYear =
+                (lowerYear === null || pub.year >= lowerYear) &&
+                (upperYear === null || pub.year <= upperYear);
             const matchesType = selectedType === 'all' || pub.type === selectedType;
 
             return matchesSearch && matchesYear && matchesType;
-        });
-    }, [publications, searchQuery, selectedYear, selectedType]);
+        }).sort((a, b) => {
+            if (sortOption === 'year') {
+                return b.publication.year - a.publication.year || a.sourceIndex - b.sourceIndex;
+            }
+
+            const scoreA = getSortScore(a.publication, sortOption);
+            const scoreB = getSortScore(b.publication, sortOption);
+
+            if (scoreA === undefined && scoreB !== undefined) return 1;
+            if (scoreA !== undefined && scoreB === undefined) return -1;
+            if (scoreA !== undefined && scoreB !== undefined && scoreA !== scoreB) return scoreB - scoreA;
+
+            return b.publication.year - a.publication.year || a.sourceIndex - b.sourceIndex;
+        }).map(({ publication }) => publication);
+    }, [publications, searchQuery, startYear, endYear, selectedType, sortOption]);
 
     return (
         <motion.div
@@ -100,38 +172,50 @@ export default function PublicationsList({ config, publications, embedded = fals
                     </div>
                 </div>
 
-                <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-800 flex flex-wrap gap-6">
+                <div className="grid gap-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 lg:grid-cols-[1.2fr_0.9fr_1.2fr]">
                     {/* Year Filter */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <CalendarIcon className="h-4 w-4 mr-1" /> {messages.publications.year}
                         </label>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <button
-                                onClick={() => setSelectedYear('all')}
+                                type="button"
+                                onClick={() => {
+                                    setStartYear('');
+                                    setEndYear('');
+                                }}
+                                aria-pressed={startYear === '' && endYear === ''}
                                 className={cn(
                                     "px-3 py-1 text-xs rounded-full transition-colors",
-                                    selectedYear === 'all'
+                                    startYear === '' && endYear === ''
                                         ? "bg-accent text-white"
                                         : "bg-white dark:bg-neutral-800 text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
                                 )}
                             >
                                 {messages.common.all}
                             </button>
-                            {years.map(year => (
-                                <button
-                                    key={year}
-                                    onClick={() => setSelectedYear(year)}
-                                    className={cn(
-                                        "px-3 py-1 text-xs rounded-full transition-colors",
-                                        selectedYear === year
-                                            ? "bg-accent text-white"
-                                            : "bg-white dark:bg-neutral-800 text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                                    )}
-                                >
-                                    {year}
-                                </button>
-                            ))}
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={4}
+                                value={startYear}
+                                onChange={(event) => setStartYear(event.target.value.replace(/\D/g, '').slice(0, 4))}
+                                placeholder={messages.publications.fromYear}
+                                aria-label={messages.publications.fromYear}
+                                className="w-24 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                            />
+                            <span className="text-xs text-neutral-400" aria-hidden="true">–</span>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={4}
+                                value={endYear}
+                                onChange={(event) => setEndYear(event.target.value.replace(/\D/g, '').slice(0, 4))}
+                                placeholder={messages.publications.toYear}
+                                aria-label={messages.publications.toYear}
+                                className="w-24 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                            />
                         </div>
                     </div>
 
@@ -142,7 +226,9 @@ export default function PublicationsList({ config, publications, embedded = fals
                         </label>
                         <div className="flex flex-wrap gap-2">
                             <button
+                                type="button"
                                 onClick={() => setSelectedType('all')}
+                                aria-pressed={selectedType === 'all'}
                                 className={cn(
                                     "px-3 py-1 text-xs rounded-full transition-colors",
                                     selectedType === 'all'
@@ -154,8 +240,10 @@ export default function PublicationsList({ config, publications, embedded = fals
                             </button>
                             {types.map(type => (
                                 <button
+                                    type="button"
                                     key={type}
                                     onClick={() => setSelectedType(type)}
+                                    aria-pressed={selectedType === type}
                                     className={cn(
                                         "px-3 py-1 text-xs rounded-full capitalize transition-colors",
                                         selectedType === type
@@ -164,6 +252,31 @@ export default function PublicationsList({ config, publications, embedded = fals
                                     )}
                                 >
                                     {type.replace('-', ' ')}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Sort Controls */}
+                    <div className="space-y-2">
+                        <label className="flex items-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                            <ArrowsUpDownIcon className="mr-1 h-4 w-4" /> {messages.publications.sortBy}
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {sortOptions.map(option => (
+                                <button
+                                    type="button"
+                                    key={option.value}
+                                    onClick={() => setSortOption(option.value)}
+                                    aria-pressed={sortOption === option.value}
+                                    className={cn(
+                                        "rounded-full px-3 py-1 text-xs transition-colors",
+                                        sortOption === option.value
+                                            ? "bg-accent text-white"
+                                            : "bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                                    )}
+                                >
+                                    {option.value === 'year' ? messages.publications.year : option.label}
                                 </button>
                             ))}
                         </div>
