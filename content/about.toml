@@ -9,6 +9,33 @@ research_interests = [
   "Learning to Optimize"
 ]
 
+[[profile.education]]
+title = "Visiting Ph.D. Student"
+institution = "School of Computer Science and Informatics, De Montfort University, UK"
+period = "December 2022 – November 2023"
+supervisors = ["Shengxiang Yang"]
+
+[[profile.education]]
+title = "Ph.D. Candidate"
+institution = "College of Information Science and Engineering, Northeastern University, China"
+period = "September 2020 – April 2025"
+gpa = "3.95"
+supervisors = ["Hongfeng Wang"]
+
+[[profile.education]]
+title = "Master's Candidate"
+institution = "College of Information Science and Engineering, Northeastern University, China"
+period = "September 2018 – July 2020"
+gpa = "3.88"
+supervisors = ["Hongfeng Wang"]
+
+[[profile.education]]
+title = "Undergraduate Student"
+institution = "School of Mathematics and Systems Science, Shenyang Normal University, China"
+period = "September 2014 – July 2018"
+gpa = "3.79"
+supervisors = ["Bo Yao", "Xin He"]
+
 [[sections]]
 id = "about"
 type = "markdown"

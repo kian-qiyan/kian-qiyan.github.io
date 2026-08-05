@@ -5,6 +5,7 @@ import HomePageClient, { type HomePageLocaleData } from '@/components/home/HomeP
 import { Publication } from '@/types/publication';
 import { BasePageConfig, PublicationPageConfig, TextPageConfig, CardPageConfig } from '@/types/page';
 import { getRuntimeI18nConfig } from '@/lib/i18n/config';
+import type { EducationItem } from '@/types/education';
 
 interface SectionConfig {
   id: string;
@@ -67,8 +68,15 @@ function loadPageDataForLocale(locale: string | undefined): HomePageLocaleData {
   const localeConfig = getConfig(locale);
   const enableOnePageMode = localeConfig.features.enable_one_page_mode;
 
-  const aboutConfig = getPageConfig<{ profile?: { research_interests?: string[] }; sections?: SectionConfig[] }>('about', locale);
+  const aboutConfig = getPageConfig<{
+    profile?: {
+      research_interests?: string[];
+      education?: EducationItem[];
+    };
+    sections?: SectionConfig[];
+  }>('about', locale);
   const researchInterests = aboutConfig?.profile?.research_interests;
+  const education = aboutConfig?.profile?.education;
 
   let pagesToShow: PageData[] = [];
 
@@ -133,6 +141,7 @@ function loadPageDataForLocale(locale: string | undefined): HomePageLocaleData {
     author: localeConfig.author,
     social: localeConfig.social,
     enableOnePageMode,
+    education,
     researchInterests,
     pagesToShow,
   };
