@@ -139,6 +139,8 @@ export default function RootLayout({
     <html lang={runtimeI18n.defaultLocale} className="scroll-smooth" suppressHydrationWarning>
       <head>
         <link rel="icon" href={config.site.favicon} type="image/png" />
+        <link rel="preconnect" href="https://api.counterapi.dev" />
+        <link rel="dns-prefetch" href="//api.counterapi.dev" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
