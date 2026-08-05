@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { useLocaleStore } from '@/lib/stores/localeStore';
 
 interface AboutProps {
     content: string;
@@ -11,6 +12,7 @@ interface AboutProps {
 
 export default function About({ content, title }: AboutProps) {
     const messages = useMessages();
+    const locale = useLocaleStore((state) => state.locale);
     const resolvedTitle = title || messages.home.about;
 
     return (
@@ -43,7 +45,9 @@ export default function About({ content, title }: AboutProps) {
                                 {children}
                             </blockquote>
                         ),
-                        strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                        strong: ({ children }) => locale === 'zh'
+                            ? <strong className="font-normal text-primary underline decoration-accent/70 underline-offset-4">{children}</strong>
+                            : <strong className="font-semibold text-primary">{children}</strong>,
                         em: ({ children }) => <em className="italic text-neutral-600 dark:text-neutral-500">{children}</em>,
                     }}
                 >
