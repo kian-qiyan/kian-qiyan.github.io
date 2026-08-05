@@ -13,9 +13,8 @@ import { Github, Pin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { useLocaleStore } from '@/lib/stores/localeStore';
-import SnapshotCarousel from '@/components/home/SnapshotCarousel';
-import GlobalLikeButton from '@/components/home/GlobalLikeButton';
-import GlobalVisitCounter from '@/components/home/GlobalVisitCounter';
+import AcademicSnapshot from '@/components/home/AcademicSnapshot';
+import VisitorMap from '@/components/home/VisitorMap';
 
 // Custom ORCID icon component
 const OrcidIcon = ({ className }: { className?: string }) => (
@@ -314,10 +313,9 @@ export default function Profile({ author, social, researchInterests }: ProfilePr
                 </div>
             )}
 
-            <SnapshotCarousel scholarUrl={social.google_scholar} />
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
-                <GlobalLikeButton />
-                <GlobalVisitCounter />
+            <div className="space-y-5">
+                <AcademicSnapshot scholarUrl={social.google_scholar} />
+                <VisitorMap />
             </div>
 
         </motion.div>
