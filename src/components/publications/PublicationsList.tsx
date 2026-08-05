@@ -172,7 +172,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                     </div>
                 </div>
 
-                <div className="grid gap-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 lg:grid-cols-[1.2fr_0.9fr_1.2fr]">
+                <div className="grid gap-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 xl:grid-cols-[minmax(0,1fr)_max-content_minmax(0,1.25fr)]">
                     {/* Year Filter */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
@@ -224,13 +224,13 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <BookOpenIcon className="h-4 w-4 mr-1" /> {messages.publications.type}
                         </label>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-nowrap gap-2">
                             <button
                                 type="button"
                                 onClick={() => setSelectedType('all')}
                                 aria-pressed={selectedType === 'all'}
                                 className={cn(
-                                    "px-3 py-1 text-xs rounded-full transition-colors",
+                                    "shrink-0 whitespace-nowrap px-3 py-1 text-xs rounded-full transition-colors",
                                     selectedType === 'all'
                                         ? "bg-accent text-white"
                                         : "bg-white dark:bg-neutral-800 text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
@@ -245,7 +245,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                                     onClick={() => setSelectedType(type)}
                                     aria-pressed={selectedType === type}
                                     className={cn(
-                                        "px-3 py-1 text-xs rounded-full capitalize transition-colors",
+                                        "shrink-0 whitespace-nowrap px-3 py-1 text-xs rounded-full capitalize transition-colors",
                                         selectedType === type
                                             ? "bg-accent text-white"
                                             : "bg-white dark:bg-neutral-800 text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
