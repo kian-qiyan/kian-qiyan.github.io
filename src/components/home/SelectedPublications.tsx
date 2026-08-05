@@ -1,11 +1,15 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowTopRightOnSquareIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { Publication } from '@/types/publication';
 import { useMessages } from '@/lib/i18n/useMessages';
 import FormattedBibTeXText from '@/components/publications/FormattedBibTeXText';
+import PublicationBadges from '@/components/publications/PublicationBadges';
 import { useLocaleStore } from '@/lib/stores/localeStore';
+import { cn } from '@/lib/utils';
 
 interface SelectedPublicationsProps {
     publications: Publication[];
@@ -17,6 +21,7 @@ export default function SelectedPublications({ publications, title, enableOnePag
     const messages = useMessages();
     const locale = useLocaleStore((state) => state.locale);
     const resolvedTitle = title || messages.home.selectedPublications;
+    const [expandedAbstractId, setExpandedAbstractId] = useState<string | null>(null);
 
     return (
         <motion.section
@@ -46,13 +51,34 @@ export default function SelectedPublications({ publications, title, enableOnePag
                         transition={{ duration: 0.4, delay: 0.1 * index }}
                         className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-200 dark:border-[rgba(148,163,184,0.24)] hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
                     >
+                        <PublicationBadges publication={pub} className="mb-3" />
                         {pub.highlyCited && (
                             <span className="mb-2 inline-flex rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-300">
                                 {locale === 'zh' ? '高被引论文' : 'Highly Cited Paper'}
                             </span>
                         )}
                         <h3 className="font-semibold text-primary mb-2 leading-tight">
-                            <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                            {pub.abstract ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setExpandedAbstractId(expandedAbstractId === pub.id ? null : pub.id)}
+                                    aria-expanded={expandedAbstractId === pub.id}
+                                    aria-label={expandedAbstractId === pub.id ? messages.publications.collapseAbstract : messages.publications.expandAbstract}
+                                    className="group inline-flex w-full items-start gap-2 text-left transition-colors hover:text-accent"
+                                >
+                                    <span className="flex-1">
+                                        <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                                    </span>
+                                    <ChevronDownIcon
+                                        className={cn(
+                                            'mt-0.5 h-4 w-4 flex-none text-neutral-400 transition-transform duration-200 group-hover:text-accent',
+                                            expandedAbstractId === pub.id && 'rotate-180'
+                                        )}
+                                    />
+                                </button>
+                            ) : (
+                                <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                            )}
                         </h3>
                         <p className="text-sm text-neutral-600 dark:text-neutral-500 mb-1">
                             {pub.authors.map((author, idx) => (
@@ -78,6 +104,35 @@ export default function SelectedPublications({ publications, title, enableOnePag
                             <p className="text-sm text-neutral-500 dark:text-neutral-500 line-clamp-2">
                                 {pub.description}
                             </p>
+                        )}
+                        <AnimatePresence>
+                            {expandedAbstractId === pub.id && pub.abstract ? (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mt-3 overflow-hidden"
+                                >
+                                    <div className="rounded-lg border border-neutral-200 bg-white/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/50">
+                                        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                                            {pub.abstract}
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ) : null}
+                        </AnimatePresence>
+                        {pub.doi && (
+                            <div className="mt-3 border-t border-neutral-200 pt-3 dark:border-neutral-700">
+                                <a
+                                    href={`https://doi.org/${pub.doi}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center text-xs font-semibold text-accent transition-colors hover:text-accent-dark"
+                                >
+                                    {messages.publications.originalPaper}
+                                    <ArrowTopRightOnSquareIcon className="ml-1.5 h-3.5 w-3.5" />
+                                </a>
+                            </div>
                         )}
                     </motion.div>
                 ))}

@@ -91,13 +91,32 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
       code: tags.code,
       abstract: cleanBibTeXString(tags.abstract),
       description: cleanBibTeXString(tags.description || tags.note),
+      impactFactor: tags.impact_factor ? parseFloat(tags.impact_factor) : undefined,
+      jcrQuartile: parseJcrQuartile(tags.jcr),
+      ccfRank: parseCcfRank(tags.ccf),
+      absRank: parseAbsRank(tags.abs),
+      indexing: parseIndexing(tags.indexing),
       selected,
       selectedOrder,
       highlyCited,
       preview,
 
       // Store original BibTeX (excluding custom fields)
-      bibtex: reconstructBibTeX(entry, ['selected', 'selected_order', 'highly_cited', 'preview', 'description', 'keywords', 'code']),
+      bibtex: reconstructBibTeX(entry, [
+        'selected',
+        'selected_order',
+        'highly_cited',
+        'preview',
+        'description',
+        'keywords',
+        'code',
+        'abstract',
+        'impact_factor',
+        'jcr',
+        'ccf',
+        'abs',
+        'indexing',
+      ]),
     };
 
     // Clean up undefined fields
@@ -123,6 +142,34 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
     // Sort by month descending (December to January)
     return monthB - monthA;
   });
+}
+
+function parseJcrQuartile(value?: string): Publication['jcrQuartile'] {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && ['Q1', 'Q2', 'Q3', 'Q4'].includes(normalized)
+    ? normalized as Publication['jcrQuartile']
+    : undefined;
+}
+
+function parseCcfRank(value?: string): Publication['ccfRank'] {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && ['A', 'B', 'C'].includes(normalized)
+    ? normalized as Publication['ccfRank']
+    : undefined;
+}
+
+function parseAbsRank(value?: string): Publication['absRank'] {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && ['1', '2', '3', '4', '4*'].includes(normalized)
+    ? normalized as Publication['absRank']
+    : undefined;
+}
+
+function parseIndexing(value?: string): Publication['indexing'] {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && ['SCI', 'EI'].includes(normalized)
+    ? normalized as Publication['indexing']
+    : undefined;
 }
 
 function getHighlightNames(locale?: string): string[] {

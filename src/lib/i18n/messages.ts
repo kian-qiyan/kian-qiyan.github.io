@@ -36,6 +36,9 @@ export interface LocaleMessages {
     type: string;
     noResults: string;
     abstract: string;
+    expandAbstract: string;
+    collapseAbstract: string;
+    originalPaper: string;
     bibtex: string;
     code: string;
     correspondingAuthor: string;
@@ -85,6 +88,9 @@ const en: LocaleMessages = {
     type: 'Type',
     noResults: 'No publications found matching your criteria.',
     abstract: 'Abstract',
+    expandAbstract: 'Expand abstract',
+    collapseAbstract: 'Collapse abstract',
+    originalPaper: 'Original Paper',
     bibtex: 'BibTeX',
     code: 'Code',
     correspondingAuthor: '* Corresponding author',
@@ -134,6 +140,9 @@ const zh: LocaleMessages = {
     type: '类型',
     noResults: '没有找到符合条件的论文。',
     abstract: '摘要',
+    expandAbstract: '展开摘要',
+    collapseAbstract: '收起摘要',
+    originalPaper: '原文链接',
     bibtex: 'BibTeX',
     code: '代码',
     correspondingAuthor: '* 通讯作者',

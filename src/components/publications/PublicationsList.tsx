@@ -9,13 +9,15 @@ import {
     CalendarIcon,
     BookOpenIcon,
     ClipboardDocumentIcon,
-    DocumentTextIcon
+    ChevronDownIcon,
+    ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { Publication } from '@/types/publication';
 import { PublicationPageConfig } from '@/types/page';
 import { cn } from '@/lib/utils';
 import { useMessages } from '@/lib/i18n/useMessages';
 import FormattedBibTeXText from './FormattedBibTeXText';
+import PublicationBadges from './PublicationBadges';
 
 interface PublicationsListProps {
     config: PublicationPageConfig;
@@ -218,7 +220,27 @@ export default function PublicationsList({ config, publications, embedded = fals
                                 )}
                                 <div className="flex-grow">
                                     <h3 className={`${embedded ? "text-lg" : "text-xl"} font-semibold text-primary mb-2 leading-tight`}>
-                                        <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                                        {pub.abstract ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedAbstractId(expandedAbstractId === pub.id ? null : pub.id)}
+                                                aria-expanded={expandedAbstractId === pub.id}
+                                                aria-label={expandedAbstractId === pub.id ? messages.publications.collapseAbstract : messages.publications.expandAbstract}
+                                                className="group inline-flex w-full items-start gap-2 text-left transition-colors hover:text-accent"
+                                            >
+                                                <span className="flex-1">
+                                                    <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                                                </span>
+                                                <ChevronDownIcon
+                                                    className={cn(
+                                                        'mt-1 h-4 w-4 flex-none text-neutral-400 transition-transform duration-200 group-hover:text-accent',
+                                                        expandedAbstractId === pub.id && 'rotate-180'
+                                                    )}
+                                                />
+                                            </button>
+                                        ) : (
+                                            <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
+                                        )}
                                     </h3>
                                     <p className={`${embedded ? "text-sm" : "text-base"} text-neutral-600 dark:text-neutral-400 mb-2`}>
                                         {pub.authors.map((author, idx) => (
@@ -247,57 +269,6 @@ export default function PublicationsList({ config, publications, embedded = fals
                                         </p>
                                     )}
 
-                                    <div className="flex flex-wrap gap-2 mt-auto">
-                                        {pub.doi && (
-                                            <a
-                                                href={`https://doi.org/${pub.doi}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-accent hover:text-white transition-colors"
-                                            >
-                                                DOI
-                                            </a>
-                                        )}
-                                        {pub.code && (
-                                            <a
-                                                href={pub.code}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-accent hover:text-white transition-colors"
-                                            >
-                                                {messages.publications.code}
-                                            </a>
-                                        )}
-                                        {pub.abstract && (
-                                            <button
-                                                onClick={() => setExpandedAbstractId(expandedAbstractId === pub.id ? null : pub.id)}
-                                                className={cn(
-                                                    "inline-flex items-center px-3 py-1 rounded-md text-xs font-medium transition-colors",
-                                                    expandedAbstractId === pub.id
-                                                        ? "bg-accent text-white"
-                                                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-accent hover:text-white"
-                                                )}
-                                            >
-                                                <DocumentTextIcon className="h-3 w-3 mr-1.5" />
-                                                {messages.publications.abstract}
-                                            </button>
-                                        )}
-                                        {pub.bibtex && (
-                                            <button
-                                                onClick={() => setExpandedBibtexId(expandedBibtexId === pub.id ? null : pub.id)}
-                                                className={cn(
-                                                    "inline-flex items-center px-3 py-1 rounded-md text-xs font-medium transition-colors",
-                                                    expandedBibtexId === pub.id
-                                                        ? "bg-accent text-white"
-                                                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-accent hover:text-white"
-                                                )}
-                                            >
-                                                <BookOpenIcon className="h-3 w-3 mr-1.5" />
-                                                {messages.publications.bibtex}
-                                            </button>
-                                        )}
-                                    </div>
-
                                     <AnimatePresence>
                                         {expandedAbstractId === pub.id && pub.abstract ? (
                                             <motion.div
@@ -314,6 +285,50 @@ export default function PublicationsList({ config, publications, embedded = fals
                                                 </div>
                                             </motion.div>
                                         ) : null}
+                                    </AnimatePresence>
+
+                                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                        <div className="flex flex-wrap gap-2">
+                                            {pub.doi && (
+                                                <a
+                                                    href={`https://doi.org/${pub.doi}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center rounded-md bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-accent hover:text-white dark:bg-neutral-800 dark:text-neutral-300"
+                                                >
+                                                    <ArrowTopRightOnSquareIcon className="mr-1.5 h-3.5 w-3.5" />
+                                                    {messages.publications.originalPaper}
+                                                </a>
+                                            )}
+                                            {pub.code && (
+                                                <a
+                                                    href={pub.code}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center rounded-md bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-accent hover:text-white dark:bg-neutral-800 dark:text-neutral-300"
+                                                >
+                                                    {messages.publications.code}
+                                                </a>
+                                            )}
+                                            {pub.bibtex && (
+                                                <button
+                                                    onClick={() => setExpandedBibtexId(expandedBibtexId === pub.id ? null : pub.id)}
+                                                    className={cn(
+                                                        "inline-flex items-center rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                                                        expandedBibtexId === pub.id
+                                                            ? "bg-accent text-white"
+                                                            : "bg-neutral-100 text-neutral-700 hover:bg-accent hover:text-white dark:bg-neutral-800 dark:text-neutral-300"
+                                                    )}
+                                                >
+                                                    <BookOpenIcon className="mr-1.5 h-3 w-3" />
+                                                    {messages.publications.bibtex}
+                                                </button>
+                                            )}
+                                        </div>
+                                        <PublicationBadges publication={pub} className="sm:justify-end" />
+                                    </div>
+
+                                    <AnimatePresence>
                                         {expandedBibtexId === pub.id && pub.bibtex ? (
                                             <motion.div
                                                 key="bibtex"

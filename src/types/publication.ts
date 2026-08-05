@@ -42,7 +42,10 @@ export interface Publication {
   status: PublicationStatus;
   citations?: number;
   impactFactor?: number;
-  quartile?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  jcrQuartile?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  ccfRank?: 'A' | 'B' | 'C';
+  absRank?: '1' | '2' | '3' | '4' | '4*';
+  indexing?: 'SCI' | 'EI';
   bibtex?: string;
   venue?: string;
   location?: string;
