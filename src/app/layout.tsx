@@ -141,6 +141,8 @@ export default function RootLayout({
         <link rel="icon" href={config.site.favicon} type="image/png" />
         <link rel="preconnect" href="https://api.counterapi.dev" />
         <link rel="dns-prefetch" href="//api.counterapi.dev" />
+        <link rel="preconnect" href="https://api.country.is" />
+        <link rel="dns-prefetch" href="//api.country.is" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
