@@ -44,8 +44,12 @@ export interface Publication {
   impactFactor?: number;
   jcrQuartile?: 'Q1' | 'Q2' | 'Q3' | 'Q4';
   ccfRank?: 'A' | 'B' | 'C';
-  absRank?: '1' | '2' | '3' | '4' | '4*';
+  ajgRank?: '1' | '2' | '3' | '4' | '4*';
   indexing?: 'SCI' | 'EI';
+  jifYear?: number;
+  jcrEdition?: number;
+  ccfEdition?: number;
+  ajgEdition?: number;
   bibtex?: string;
   venue?: string;
   location?: string;

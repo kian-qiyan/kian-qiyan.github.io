@@ -27,8 +27,8 @@ export default function PublicationBadges({ publication, className, highlyCitedL
       label: `CCF ${publication.ccfRank}`,
       className: 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300',
     } : null,
-    publication.absRank ? {
-      label: `ABS ${publication.absRank}`,
+    publication.ajgRank ? {
+      label: `AJG ${publication.ajgRank}`,
       className: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300',
     } : null,
     publication.indexing === 'EI' ? {

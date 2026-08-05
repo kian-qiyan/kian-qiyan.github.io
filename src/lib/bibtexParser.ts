@@ -94,8 +94,12 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
       impactFactor: tags.impact_factor ? parseFloat(tags.impact_factor) : undefined,
       jcrQuartile: parseJcrQuartile(tags.jcr),
       ccfRank: parseCcfRank(tags.ccf),
-      absRank: parseAbsRank(tags.abs),
+      ajgRank: parseAjgRank(tags.ajg),
       indexing: parseIndexing(tags.indexing),
+      jifYear: parseOptionalInteger(tags.jif_year),
+      jcrEdition: parseOptionalInteger(tags.jcr_edition),
+      ccfEdition: parseOptionalInteger(tags.ccf_edition),
+      ajgEdition: parseOptionalInteger(tags.ajg_edition),
       selected,
       selectedOrder,
       highlyCited,
@@ -114,8 +118,12 @@ export function parseBibTeX(bibtexContent: string, locale?: string): Publication
         'impact_factor',
         'jcr',
         'ccf',
-        'abs',
+        'ajg',
         'indexing',
+        'jif_year',
+        'jcr_edition',
+        'ccf_edition',
+        'ajg_edition',
       ]),
     };
 
@@ -158,11 +166,18 @@ function parseCcfRank(value?: string): Publication['ccfRank'] {
     : undefined;
 }
 
-function parseAbsRank(value?: string): Publication['absRank'] {
+function parseAjgRank(value?: string): Publication['ajgRank'] {
   const normalized = value?.trim().toUpperCase();
   return normalized && ['1', '2', '3', '4', '4*'].includes(normalized)
-    ? normalized as Publication['absRank']
+    ? normalized as Publication['ajgRank']
     : undefined;
+}
+
+function parseOptionalInteger(value?: string): number | undefined {
+  if (!value) return undefined;
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
 }
 
 function parseIndexing(value?: string): Publication['indexing'] {
