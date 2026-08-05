@@ -13,7 +13,7 @@ import { Github, Pin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { useLocaleStore } from '@/lib/stores/localeStore';
-import AcademicSnapshot from '@/components/home/AcademicSnapshot';
+import SnapshotCarousel from '@/components/home/SnapshotCarousel';
 import GlobalLikeButton from '@/components/home/GlobalLikeButton';
 import GlobalVisitCounter from '@/components/home/GlobalVisitCounter';
 
@@ -314,7 +314,7 @@ export default function Profile({ author, social, researchInterests }: ProfilePr
                 </div>
             )}
 
-            <AcademicSnapshot scholarUrl={social.google_scholar} />
+            <SnapshotCarousel scholarUrl={social.google_scholar} />
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
                 <GlobalLikeButton />
                 <GlobalVisitCounter />

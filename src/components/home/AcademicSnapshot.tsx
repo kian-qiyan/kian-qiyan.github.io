@@ -57,7 +57,7 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
   ];
 
   return (
-    <section className="mb-5 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <section className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
       <h3 className="mb-3 font-semibold text-primary">
         {isChinese ? '学术概览' : 'Academic Snapshot'}
       </h3>
@@ -86,7 +86,7 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
         })}
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-1 text-[11px] text-neutral-500 dark:text-neutral-400">
+      <div className="mt-auto flex items-center justify-center gap-1 pt-3 text-[11px] text-neutral-500 dark:text-neutral-400">
         <span>{isChinese ? '数据统计参考' : 'Statistics referenced from'}</span>
         {scholarUrl ? (
           <a
