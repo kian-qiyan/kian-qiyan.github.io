@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -38,7 +39,13 @@ export default function Footer({ lastUpdated, lastUpdatedByLocale, defaultLocale
             >
               {messages.footer.refinedBy}
             </a>
-            <span className="ml-2" aria-hidden="true">🚀</span>
+            <Image
+              src="/bio.jpg"
+              alt="Qi Yan"
+              width={24}
+              height={24}
+              className="ml-2 h-6 w-6 rounded-full object-cover object-[50%_12%] ring-1 ring-neutral-200 dark:ring-neutral-700"
+            />
           </p>
         </div>
       </div>
