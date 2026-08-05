@@ -51,12 +51,11 @@ export default function SelectedPublications({ publications, title, enableOnePag
                         transition={{ duration: 0.4, delay: 0.1 * index }}
                         className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-200 dark:border-[rgba(148,163,184,0.24)] hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
                     >
-                        <PublicationBadges publication={pub} className="mb-3" />
-                        {pub.highlyCited && (
-                            <span className="mb-2 inline-flex rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-300">
-                                {locale === 'zh' ? '高被引论文' : 'Highly Cited Paper'}
-                            </span>
-                        )}
+                        <PublicationBadges
+                            publication={pub}
+                            className="mb-3"
+                            highlyCitedLabel={pub.highlyCited ? (locale === 'zh' ? '高被引论文' : 'Highly Cited Paper') : undefined}
+                        />
                         <h3 className="font-semibold text-primary mb-2 leading-tight">
                             {pub.abstract ? (
                                 <button

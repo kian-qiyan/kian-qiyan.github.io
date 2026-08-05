@@ -4,12 +4,17 @@ import { cn } from '@/lib/utils';
 interface PublicationBadgesProps {
   publication: Publication;
   className?: string;
+  highlyCitedLabel?: string;
 }
 
 const badgeBase = 'inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide shadow-sm';
 
-export default function PublicationBadges({ publication, className }: PublicationBadgesProps) {
+export default function PublicationBadges({ publication, className, highlyCitedLabel }: PublicationBadgesProps) {
   const badges = [
+    highlyCitedLabel ? {
+      label: highlyCitedLabel,
+      className: 'border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950/50 dark:text-red-300',
+    } : null,
     publication.impactFactor !== undefined ? {
       label: `IF ${publication.impactFactor.toFixed(1)}`,
       className: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-300',
