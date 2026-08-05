@@ -178,7 +178,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <CalendarIcon className="h-4 w-4 mr-1" /> {messages.publications.year}
                         </label>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -187,7 +187,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                                 }}
                                 aria-pressed={startYear === '' && endYear === ''}
                                 className={cn(
-                                    "px-3 py-1 text-xs rounded-full transition-colors",
+                                    "shrink-0 whitespace-nowrap px-3 py-1 text-xs rounded-full transition-colors",
                                     startYear === '' && endYear === ''
                                         ? "bg-accent text-white"
                                         : "bg-white dark:bg-neutral-800 text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
@@ -203,7 +203,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                                 onChange={(event) => setStartYear(event.target.value.replace(/\D/g, '').slice(0, 4))}
                                 placeholder={messages.publications.fromYear}
                                 aria-label={messages.publications.fromYear}
-                                className="w-24 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                                className="w-20 shrink-0 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
                             />
                             <span className="text-xs text-neutral-400" aria-hidden="true">–</span>
                             <input
@@ -214,7 +214,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                                 onChange={(event) => setEndYear(event.target.value.replace(/\D/g, '').slice(0, 4))}
                                 placeholder={messages.publications.toYear}
                                 aria-label={messages.publications.toYear}
-                                className="w-24 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                                className="w-20 shrink-0 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs tabular-nums text-neutral-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
                             />
                         </div>
                     </div>
@@ -224,7 +224,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <BookOpenIcon className="h-4 w-4 mr-1" /> {messages.publications.type}
                         </label>
-                        <div className="flex flex-nowrap gap-2">
+                        <div className="flex flex-nowrap gap-2 overflow-x-auto">
                             <button
                                 type="button"
                                 onClick={() => setSelectedType('all')}
@@ -262,7 +262,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="flex items-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
                             <ArrowsUpDownIcon className="mr-1 h-4 w-4" /> {messages.publications.sortBy}
                         </label>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-nowrap gap-2 overflow-x-auto">
                             {sortOptions.map(option => (
                                 <button
                                     type="button"
@@ -270,7 +270,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                                     onClick={() => setSortOption(option.value)}
                                     aria-pressed={sortOption === option.value}
                                     className={cn(
-                                        "rounded-full px-3 py-1 text-xs transition-colors",
+                                        "shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs transition-colors",
                                         sortOption === option.value
                                             ? "bg-accent text-white"
                                             : "bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
