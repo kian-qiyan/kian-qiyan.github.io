@@ -51,11 +51,6 @@ export default function SelectedPublications({ publications, title, enableOnePag
                         transition={{ duration: 0.4, delay: 0.1 * index }}
                         className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-200 dark:border-[rgba(148,163,184,0.24)] hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
                     >
-                        <PublicationBadges
-                            publication={pub}
-                            className="mb-3"
-                            highlyCitedLabel={pub.highlyCited ? (locale === 'zh' ? '高被引论文' : 'Highly Cited Paper') : undefined}
-                        />
                         <h3 className="font-semibold text-primary mb-2 leading-tight">
                             {pub.abstract ? (
                                 <button
@@ -120,8 +115,8 @@ export default function SelectedPublications({ publications, title, enableOnePag
                                 </motion.div>
                             ) : null}
                         </AnimatePresence>
-                        {pub.doi && (
-                            <div className="mt-3 border-t border-neutral-200 pt-3 dark:border-neutral-700">
+                        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 dark:border-neutral-700">
+                            {pub.doi && (
                                 <a
                                     href={`https://doi.org/${pub.doi}`}
                                     target="_blank"
@@ -131,8 +126,13 @@ export default function SelectedPublications({ publications, title, enableOnePag
                                     {messages.publications.originalPaper}
                                     <ArrowTopRightOnSquareIcon className="ml-1.5 h-3.5 w-3.5" />
                                 </a>
-                            </div>
-                        )}
+                            )}
+                            <PublicationBadges
+                                publication={pub}
+                                className="ml-auto justify-end"
+                                highlyCitedLabel={pub.highlyCited ? (locale === 'zh' ? '高被引论文' : 'Highly Cited Paper') : undefined}
+                            />
+                        </div>
                     </motion.div>
                 ))}
             </div>
