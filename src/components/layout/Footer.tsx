@@ -4,21 +4,21 @@ import Image from 'next/image';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 import { useMessages } from '@/lib/i18n/useMessages';
 
-interface FooterProps {
-  lastUpdated?: string;
-  lastUpdatedByLocale?: Record<string, string | undefined>;
-  defaultLocale?: string;
-}
-
-export default function Footer({ lastUpdated, lastUpdatedByLocale, defaultLocale = 'en' }: FooterProps) {
+export default function Footer() {
   const locale = useLocaleStore((state) => state.locale);
   const messages = useMessages();
-
-  const resolvedLastUpdated =
-    lastUpdatedByLocale?.[locale] ||
-    (defaultLocale ? lastUpdatedByLocale?.[defaultLocale] : undefined) ||
-    lastUpdated ||
-    new Date().toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const buildTimestamp = process.env.NEXT_PUBLIC_BUILD_TIMESTAMP;
+  const resolvedLastUpdated = new Intl.DateTimeFormat(locale === 'zh' ? 'zh-CN' : 'en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Shanghai',
+    timeZoneName: 'short',
+  }).format(buildTimestamp ? new Date(buildTimestamp) : new Date());
 
   return (
     <footer className="border-t border-neutral-200/50 bg-neutral-50/50 dark:bg-neutral-900/50 dark:border-neutral-700/50">

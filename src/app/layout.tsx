@@ -100,23 +100,19 @@ function buildLocalizedConfigMaps(
 ): {
   navigationByLocale: Record<string, SiteConfig['navigation']>;
   siteTitleByLocale: Record<string, string>;
-  lastUpdatedByLocale: Record<string, string | undefined>;
 } {
   const navigationByLocale: Record<string, SiteConfig['navigation']> = {};
   const siteTitleByLocale: Record<string, string> = {};
-  const lastUpdatedByLocale: Record<string, string | undefined> = {};
 
   for (const locale of locales) {
     const localizedConfig = getConfig(locale);
     navigationByLocale[locale] = localizedConfig.navigation;
     siteTitleByLocale[locale] = localizedConfig.site.title;
-    lastUpdatedByLocale[locale] = localizedConfig.site.last_updated;
   }
 
   return {
     navigationByLocale,
     siteTitleByLocale,
-    lastUpdatedByLocale,
   };
 }
 
@@ -132,7 +128,6 @@ export default function RootLayout({
   const {
     navigationByLocale,
     siteTitleByLocale,
-    lastUpdatedByLocale,
   } = buildLocalizedConfigMaps(targetLocales);
 
   return (
@@ -141,8 +136,8 @@ export default function RootLayout({
         <link rel="icon" href={config.site.favicon} type="image/png" />
         <link rel="preconnect" href="https://counterapi.com" />
         <link rel="dns-prefetch" href="//counterapi.com" />
-        <link rel="preconnect" href="https://api.country.is" />
-        <link rel="dns-prefetch" href="//api.country.is" />
+        <link rel="preconnect" href="https://ipwho.is" />
+        <link rel="dns-prefetch" href="//ipwho.is" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -184,11 +179,7 @@ export default function RootLayout({
             <main className="min-h-screen pt-16 lg:pt-20">
               {children}
             </main>
-            <Footer
-              lastUpdated={config.site.last_updated}
-              lastUpdatedByLocale={lastUpdatedByLocale}
-              defaultLocale={runtimeI18n.defaultLocale}
-            />
+            <Footer />
           </LocaleProvider>
         </ThemeProvider>
       </body>
