@@ -178,7 +178,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <CalendarIcon className="h-4 w-4 mr-1" /> {messages.publications.year}
                         </label>
-                        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+                        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -224,7 +224,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center">
                             <BookOpenIcon className="h-4 w-4 mr-1" /> {messages.publications.type}
                         </label>
-                        <div className="flex flex-nowrap gap-2 overflow-x-auto">
+                        <div className="flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             <button
                                 type="button"
                                 onClick={() => setSelectedType('all')}
@@ -262,7 +262,7 @@ export default function PublicationsList({ config, publications, embedded = fals
                         <label className="flex items-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
                             <ArrowsUpDownIcon className="mr-1 h-4 w-4" /> {messages.publications.sortBy}
                         </label>
-                        <div className="flex flex-nowrap gap-2 overflow-x-auto">
+                        <div className="flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             {sortOptions.map(option => (
                                 <button
                                     type="button"
