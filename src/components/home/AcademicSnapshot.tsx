@@ -75,7 +75,7 @@ export default function AcademicSnapshot({ scholarUrl }: AcademicSnapshotProps) 
                 <Icon className={`h-4 w-4 ${metric.color}`} aria-hidden="true" />
                 <span className={`h-1.5 w-1.5 rounded-full opacity-60 ${metric.dot}`} />
               </div>
-              <p className="font-serif text-2xl font-bold leading-none text-primary">
+              <p className="font-sans text-2xl font-bold leading-none lining-nums tabular-nums text-primary">
                 {metric.value}
               </p>
               <p className="mt-1.5 text-sm font-medium tracking-wide text-neutral-600 dark:text-neutral-400">
