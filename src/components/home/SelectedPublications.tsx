@@ -116,9 +116,9 @@ export default function SelectedPublications({ publications, title, enableOnePag
                             ) : null}
                         </AnimatePresence>
                         <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-3 dark:border-neutral-700">
-                            {pub.doi && (
+                            {(pub.url || pub.doi) && (
                                 <a
-                                    href={`https://doi.org/${pub.doi}`}
+                                    href={pub.url ?? `https://doi.org/${pub.doi}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center text-xs font-semibold text-accent transition-colors hover:text-accent-dark"

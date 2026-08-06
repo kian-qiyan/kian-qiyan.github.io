@@ -384,9 +384,9 @@ export default function PublicationsList({ config, publications, embedded = fals
 
                                     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                                         <div className="flex flex-wrap gap-2">
-                                            {pub.doi && (
+                                            {(pub.url || pub.doi) && (
                                                 <a
-                                                    href={`https://doi.org/${pub.doi}`}
+                                                    href={pub.url ?? `https://doi.org/${pub.doi}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center rounded-md bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-accent hover:text-white dark:bg-neutral-800 dark:text-neutral-300"
