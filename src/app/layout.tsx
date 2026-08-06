@@ -139,8 +139,8 @@ export default function RootLayout({
     <html lang={runtimeI18n.defaultLocale} className="scroll-smooth" suppressHydrationWarning>
       <head>
         <link rel="icon" href={config.site.favicon} type="image/png" />
-        <link rel="preconnect" href="https://api.counterapi.dev" />
-        <link rel="dns-prefetch" href="//api.counterapi.dev" />
+        <link rel="preconnect" href="https://counterapi.com" />
+        <link rel="dns-prefetch" href="//counterapi.com" />
         <link rel="preconnect" href="https://api.country.is" />
         <link rel="dns-prefetch" href="//api.country.is" />
         <script

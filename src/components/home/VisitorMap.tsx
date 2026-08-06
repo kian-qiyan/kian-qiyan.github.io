@@ -26,14 +26,26 @@ type RegionCache = {
   savedAt: number;
 };
 
+type RegionCountResult = {
+  id: string;
+  count: number;
+  succeeded: boolean;
+};
+
 type MapStatus = 'loading' | 'ready' | 'stale' | 'unavailable';
 
-const counterBaseUrl = 'https://api.counterapi.dev/v1/kian-qiyan';
+const counterBaseUrl = 'https://counterapi.com/api/kian-qiyan.github.io/visitor-region';
 const countryLookupUrl = 'https://api.country.is/';
-const regionCounterPrefix = 'visitor-region-';
-const sessionKey = 'kian-home-region-counted-v1';
-const cacheKey = 'kian-home-region-counts-v1';
-const requestTimeout = 5000;
+const sessionKey = 'kian-home-region-counted-v2';
+const cacheKey = 'kian-home-region-counts-v2';
+const requestTimeout = 10000;
+const refreshInterval = 120000;
+const maxConcurrentReads = 4;
+
+// Preserve successfully recorded regional visits from the previous counter service.
+const migratedCounts: Readonly<Record<string, number>> = {
+  'east-asia': 10,
+};
 
 const visitorRegions: readonly VisitorRegion[] = [
   {
@@ -183,7 +195,13 @@ const pathGenerator = geoPath(projection);
 const graticulePath = pathGenerator(geoGraticule10());
 
 function counterUrl(regionId: string, increment = false) {
-  return `${counterBaseUrl}/${regionCounterPrefix}${regionId}/${increment ? 'up' : ''}`;
+  const params = new URLSearchParams({
+    behavior: 'vote',
+    startNumber: String(migratedCounts[regionId] ?? 0),
+  });
+
+  if (!increment) params.set('readOnly', 'true');
+  return `${counterBaseUrl}/${regionId}?${params.toString()}`;
 }
 
 function readCount(payload: unknown): number | null {
@@ -194,12 +212,16 @@ function readCount(payload: unknown): number | null {
   return Number.isFinite(parsed) ? Math.max(0, parsed) : null;
 }
 
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchJson(url: string, keepalive = false): Promise<unknown> {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), requestTimeout);
 
   try {
-    const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    const response = await fetch(url, {
+      cache: 'no-store',
+      signal: controller.signal,
+      keepalive,
+    });
     if (!response.ok) throw new Error(`Request failed with ${response.status}`);
     return await response.json();
   } finally {
@@ -207,17 +229,49 @@ async function fetchJson(url: string): Promise<unknown> {
   }
 }
 
-async function getRegionCount(regionId: string): Promise<number> {
-  try {
-    return readCount(await fetchJson(counterUrl(regionId))) ?? 0;
-  } catch {
-    return 0;
+function wait(delay: number) {
+  return new Promise<void>((resolve) => window.setTimeout(resolve, delay));
+}
+
+async function fetchJsonWithRetry(url: string, attempts = 2, keepalive = false): Promise<unknown> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fetchJson(url, keepalive);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) await wait(450 * (attempt + 1));
+    }
   }
+
+  throw lastError instanceof Error ? lastError : new Error('Unable to load visitor data');
+}
+
+async function getRegionCount(regionId: string): Promise<RegionCountResult> {
+  try {
+    const count = readCount(await fetchJsonWithRetry(counterUrl(regionId)));
+    if (count === null) throw new Error('Invalid region count');
+    return { id: regionId, count, succeeded: true };
+  } catch {
+    return { id: regionId, count: 0, succeeded: false };
+  }
+}
+
+async function loadRegionCounts(): Promise<RegionCountResult[]> {
+  const results: RegionCountResult[] = [];
+
+  for (let index = 0; index < visitorRegions.length; index += maxConcurrentReads) {
+    const batch = visitorRegions.slice(index, index + maxConcurrentReads);
+    results.push(...(await Promise.all(batch.map((region) => getRegionCount(region.id)))));
+  }
+
+  return results;
 }
 
 async function incrementRegion(regionId: string): Promise<number | null> {
   try {
-    return readCount(await fetchJson(counterUrl(regionId, true)));
+    return readCount(await fetchJsonWithRetry(counterUrl(regionId, true), 3, true));
   } catch {
     return null;
   }
@@ -289,48 +343,83 @@ export default function VisitorMap() {
 
   useEffect(() => {
     let cancelled = false;
-    const cached = readCachedCounts();
+    let syncing = false;
+    let resolvedRegionId: string | null | undefined;
+    const initialCache = readCachedCounts();
 
-    if (cached) {
-      setCounts(cached.counts);
+    if (initialCache) {
+      setCounts(initialCache.counts);
       setStatus('stale');
     }
 
     const syncMap = async () => {
-      const [regionId, loadedCounts] = await Promise.all([
-        getCurrentRegion(),
-        Promise.all(visitorRegions.map(async (region) => [region.id, await getRegionCount(region.id)] as const)),
-      ]);
+      if (syncing) return;
+      syncing = true;
 
-      if (cancelled) return;
-      setCurrentRegionId(regionId);
+      try {
+        const loadedCountsPromise = loadRegionCounts();
+        const regionId = resolvedRegionId === undefined
+          ? await getCurrentRegion()
+          : resolvedRegionId;
 
-      const nextCounts = Object.fromEntries(loadedCounts);
-      let liveRequestSucceeded = loadedCounts.some(([, count]) => count > 0);
+        if (cancelled) return;
+        if (regionId !== null) resolvedRegionId = regionId;
+        setCurrentRegionId(regionId);
 
-      if (regionId && shouldTrackVisit() && !hasCountedThisSession()) {
-        markSessionAsCounted();
-        const incrementedCount = await incrementRegion(regionId);
+        const latestCache = readCachedCounts();
+        const nextCounts: Record<string, number> = { ...(latestCache?.counts ?? {}) };
+        let liveRequestSucceeded = false;
+
+        if (regionId && shouldTrackVisit() && !hasCountedThisSession()) {
+          const incrementedCount = await incrementRegion(regionId);
+          if (cancelled) return;
+
+          if (incrementedCount !== null) {
+            markSessionAsCounted();
+            nextCounts[regionId] = Math.max(nextCounts[regionId] ?? 0, incrementedCount);
+            liveRequestSucceeded = true;
+          }
+        }
+
+        if (liveRequestSucceeded) {
+          writeCachedCounts(nextCounts);
+          setCounts({ ...nextCounts });
+          setStatus('ready');
+        }
+
+        const loadedCounts = await loadedCountsPromise;
         if (cancelled) return;
 
-        if (incrementedCount !== null) {
-          nextCounts[regionId] = Math.max(nextCounts[regionId] ?? 0, incrementedCount);
+        loadedCounts.forEach((result) => {
+          if (!result.succeeded) return;
+          nextCounts[result.id] = Math.max(nextCounts[result.id] ?? 0, result.count);
           liveRequestSucceeded = true;
-        }
-      }
+        });
 
-      if (liveRequestSucceeded || regionId) {
-        writeCachedCounts(nextCounts);
-        setCounts(nextCounts);
-        setStatus('ready');
-      } else {
-        setStatus(cached ? 'stale' : 'unavailable');
+        if (liveRequestSucceeded) {
+          writeCachedCounts(nextCounts);
+          setCounts({ ...nextCounts });
+          setStatus('ready');
+        } else {
+          setStatus(latestCache || initialCache ? 'stale' : 'unavailable');
+        }
+      } finally {
+        syncing = false;
       }
     };
 
     void syncMap();
+
+    const intervalId = window.setInterval(() => void syncMap(), refreshInterval);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') void syncMap();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       cancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
