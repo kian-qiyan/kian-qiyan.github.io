@@ -533,7 +533,7 @@ export default function VisitorMap() {
             : `${visibleLocations.length} visitor locations · ${totalMappedVisits} mapped visits`;
 
   return (
-    <section className="flex h-full min-h-[320px] flex-col rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <section className="flex h-full min-h-[320px] flex-col rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg motion-reduce:transform-none dark:border-neutral-800 dark:bg-neutral-900">
       <div className="mb-2 flex items-center justify-between gap-3">
         <h3 className="font-semibold text-primary">
           {isChinese ? '访客地图' : 'Visitor Map'}
