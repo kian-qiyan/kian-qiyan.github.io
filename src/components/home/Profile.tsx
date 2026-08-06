@@ -292,7 +292,7 @@ export default function Profile({ author, social, researchInterests }: ProfilePr
 
             {/* Research Interests */}
             {researchInterests && researchInterests.length > 0 && (
-                <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 mb-6 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+                <div className="mb-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg motion-reduce:transform-none dark:border-neutral-800 dark:bg-neutral-900">
                     <h3 className="font-semibold text-primary mb-3">{messages.profile.researchInterests}</h3>
                     <div className={isChinese
                         ? 'grid grid-cols-2 gap-2 text-sm'
