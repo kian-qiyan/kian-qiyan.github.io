@@ -2,17 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { MapIcon } from '@heroicons/react/24/outline';
-import { geoGraticule10, geoNaturalEarth1, geoPath } from 'd3-geo';
+import { geoCentroid, geoGraticule10, geoNaturalEarth1, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import worldAtlas from 'world-atlas/countries-110m.json';
 import { useLocaleStore } from '@/lib/stores/localeStore';
 
-type VisitorRegion = {
+type VisitorLocation = {
   id: string;
   labelEn: string;
   labelZh: string;
   coordinates: [number, number];
-  countries: readonly string[];
 };
 
 type CounterPayload = {
@@ -21,171 +20,71 @@ type CounterPayload = {
   data?: { count?: unknown; value?: unknown };
 };
 
-type RegionCache = {
+type LocationCache = {
   counts: Record<string, number>;
   savedAt: number;
 };
 
-type RegionCountResult = {
-  id: string;
-  count: number;
-  succeeded: boolean;
+type IpWhoPayload = {
+  success?: unknown;
+  country?: unknown;
+  country_code?: unknown;
+  region?: unknown;
+  region_code?: unknown;
+  latitude?: unknown;
+  longitude?: unknown;
 };
 
 type MapStatus = 'loading' | 'ready' | 'stale' | 'unavailable';
 
-const counterBaseUrl = 'https://counterapi.com/api/kian-qiyan.github.io/visitor-region';
-const countryLookupUrl = 'https://api.country.is/';
-const sessionKey = 'kian-home-region-counted-v2';
-const cacheKey = 'kian-home-region-counts-v2';
+const counterNamespace = 'kian-qiyan.github.io';
+const counterAction = 'visitor-location';
+const counterBaseUrl = `https://counterapi.com/api/${counterNamespace}/${counterAction}`;
+const counterStatsUrl = `https://counterapi.com/stats/${counterNamespace}/${counterAction}`;
+const countryLookupUrl = 'https://ipwho.is/';
+const sessionKey = 'kian-home-location-counted-v3';
+const cacheKey = 'kian-home-location-counts-v3';
 const requestTimeout = 10000;
 const refreshInterval = 120000;
-const maxConcurrentReads = 4;
 
-// Preserve successfully recorded regional visits from the previous counter service.
-const migratedCounts: Readonly<Record<string, number>> = {
-  'east-asia': 10,
-};
-
-const visitorRegions: readonly VisitorRegion[] = [
-  {
-    id: 'north-america',
-    labelEn: 'North America',
-    labelZh: '北美洲',
-    coordinates: [-104, 47],
-    countries: ['BM', 'CA', 'GL', 'PM', 'US'],
-  },
-  {
-    id: 'central-america-caribbean',
-    labelEn: 'Central America & Caribbean',
-    labelZh: '中美洲与加勒比地区',
-    coordinates: [-82, 18],
-    countries: ['AG', 'AI', 'AW', 'BB', 'BL', 'BQ', 'BS', 'BZ', 'CR', 'CU', 'CW', 'DM', 'DO', 'GD', 'GP', 'GT', 'HN', 'HT', 'JM', 'KN', 'KY', 'LC', 'MF', 'MQ', 'MS', 'MX', 'NI', 'PA', 'PR', 'SV', 'SX', 'TC', 'TT', 'VC', 'VG', 'VI'],
-  },
-  {
-    id: 'northern-south-america',
-    labelEn: 'Northern South America',
-    labelZh: '南美洲北部',
-    coordinates: [-64, 3],
-    countries: ['CO', 'EC', 'GF', 'GY', 'SR', 'VE'],
-  },
-  {
-    id: 'southern-south-america',
-    labelEn: 'Southern South America',
-    labelZh: '南美洲南部',
-    coordinates: [-62, -25],
-    countries: ['AR', 'BO', 'BR', 'CL', 'FK', 'PE', 'PY', 'UY'],
-  },
-  {
-    id: 'northern-europe',
-    labelEn: 'Northern Europe',
-    labelZh: '北欧',
-    coordinates: [10, 59],
-    countries: ['DK', 'EE', 'FI', 'FO', 'GB', 'GG', 'IE', 'IM', 'IS', 'JE', 'LT', 'LV', 'NO', 'SE', 'SJ'],
-  },
-  {
-    id: 'western-europe',
-    labelEn: 'Western Europe',
-    labelZh: '西欧',
-    coordinates: [3, 48],
-    countries: ['AT', 'BE', 'CH', 'DE', 'FR', 'LI', 'LU', 'MC', 'NL'],
-  },
-  {
-    id: 'southern-europe',
-    labelEn: 'Southern Europe',
-    labelZh: '南欧',
-    coordinates: [15, 40],
-    countries: ['AD', 'AL', 'BA', 'CY', 'ES', 'GI', 'GR', 'HR', 'IT', 'ME', 'MK', 'MT', 'PT', 'RS', 'SI', 'SM', 'VA', 'XK'],
-  },
-  {
-    id: 'eastern-europe',
-    labelEn: 'Eastern Europe',
-    labelZh: '东欧',
-    coordinates: [31, 52],
-    countries: ['BG', 'BY', 'CZ', 'HU', 'MD', 'PL', 'RO', 'RU', 'SK', 'UA'],
-  },
-  {
-    id: 'north-africa',
-    labelEn: 'North Africa',
-    labelZh: '北非',
-    coordinates: [14, 28],
-    countries: ['DZ', 'EG', 'EH', 'LY', 'MA', 'SD', 'TN'],
-  },
-  {
-    id: 'west-africa',
-    labelEn: 'West Africa',
-    labelZh: '西非',
-    coordinates: [-4, 10],
-    countries: ['BF', 'BJ', 'CI', 'CV', 'GH', 'GM', 'GN', 'GW', 'LR', 'ML', 'MR', 'NE', 'NG', 'SH', 'SL', 'SN', 'TG'],
-  },
-  {
-    id: 'central-africa',
-    labelEn: 'Central Africa',
-    labelZh: '中非',
-    coordinates: [18, 1],
-    countries: ['AO', 'CD', 'CF', 'CG', 'CM', 'GA', 'GQ', 'ST', 'TD'],
-  },
-  {
-    id: 'east-africa',
-    labelEn: 'East Africa',
-    labelZh: '东非',
-    coordinates: [38, 2],
-    countries: ['BI', 'DJ', 'ER', 'ET', 'KE', 'KM', 'MG', 'MU', 'MW', 'MZ', 'RE', 'RW', 'SC', 'SO', 'SS', 'TZ', 'UG', 'YT', 'ZM', 'ZW'],
-  },
-  {
-    id: 'southern-africa',
-    labelEn: 'Southern Africa',
-    labelZh: '南部非洲',
-    coordinates: [24, -27],
-    countries: ['BW', 'LS', 'NA', 'SZ', 'ZA'],
-  },
-  {
-    id: 'middle-east',
-    labelEn: 'Middle East',
-    labelZh: '中东',
-    coordinates: [45, 29],
-    countries: ['AE', 'BH', 'IL', 'IQ', 'IR', 'JO', 'KW', 'LB', 'OM', 'PS', 'QA', 'SA', 'SY', 'TR', 'YE'],
-  },
-  {
-    id: 'central-asia',
-    labelEn: 'Central Asia',
-    labelZh: '中亚',
-    coordinates: [68, 43],
-    countries: ['KG', 'KZ', 'TJ', 'TM', 'UZ'],
-  },
-  {
-    id: 'south-asia',
-    labelEn: 'South Asia',
-    labelZh: '南亚',
-    coordinates: [78, 23],
-    countries: ['AF', 'BD', 'BT', 'IN', 'LK', 'MV', 'NP', 'PK'],
-  },
-  {
-    id: 'east-asia',
-    labelEn: 'East Asia',
-    labelZh: '东亚',
-    coordinates: [112, 36],
-    countries: ['CN', 'HK', 'JP', 'KP', 'KR', 'MO', 'MN', 'TW'],
-  },
-  {
-    id: 'southeast-asia',
-    labelEn: 'Southeast Asia',
-    labelZh: '东南亚',
-    coordinates: [108, 10],
-    countries: ['BN', 'ID', 'KH', 'LA', 'MM', 'MY', 'PH', 'SG', 'TH', 'TL', 'VN'],
-  },
-  {
-    id: 'oceania',
-    labelEn: 'Oceania',
-    labelZh: '大洋洲',
-    coordinates: [139, -26],
-    countries: ['AS', 'AU', 'CC', 'CK', 'CX', 'FJ', 'FM', 'GU', 'KI', 'MH', 'MP', 'NC', 'NF', 'NR', 'NU', 'NZ', 'PF', 'PG', 'PN', 'PW', 'SB', 'TK', 'TO', 'TV', 'VU', 'WF', 'WS'],
-  },
+const chineseLocations: readonly VisitorLocation[] = [
+  { id: 'cn-ah', labelEn: 'Anhui', labelZh: '安徽', coordinates: [117.28, 31.86] },
+  { id: 'cn-bj', labelEn: 'Beijing', labelZh: '北京', coordinates: [116.41, 39.9] },
+  { id: 'cn-cq', labelEn: 'Chongqing', labelZh: '重庆', coordinates: [106.55, 29.56] },
+  { id: 'cn-fj', labelEn: 'Fujian', labelZh: '福建', coordinates: [119.3, 26.08] },
+  { id: 'cn-gd', labelEn: 'Guangdong', labelZh: '广东', coordinates: [113.27, 23.13] },
+  { id: 'cn-gs', labelEn: 'Gansu', labelZh: '甘肃', coordinates: [103.83, 36.06] },
+  { id: 'cn-gx', labelEn: 'Guangxi', labelZh: '广西', coordinates: [108.32, 22.82] },
+  { id: 'cn-gz', labelEn: 'Guizhou', labelZh: '贵州', coordinates: [106.71, 26.58] },
+  { id: 'cn-ha', labelEn: 'Henan', labelZh: '河南', coordinates: [113.63, 34.75] },
+  { id: 'cn-hb', labelEn: 'Hubei', labelZh: '湖北', coordinates: [114.31, 30.59] },
+  { id: 'cn-he', labelEn: 'Hebei', labelZh: '河北', coordinates: [114.51, 38.04] },
+  { id: 'cn-hi', labelEn: 'Hainan', labelZh: '海南', coordinates: [110.35, 20.02] },
+  { id: 'cn-hk', labelEn: 'Hong Kong', labelZh: '香港', coordinates: [114.17, 22.32] },
+  { id: 'cn-hl', labelEn: 'Heilongjiang', labelZh: '黑龙江', coordinates: [126.64, 45.76] },
+  { id: 'cn-hn', labelEn: 'Hunan', labelZh: '湖南', coordinates: [112.94, 28.23] },
+  { id: 'cn-jl', labelEn: 'Jilin', labelZh: '吉林', coordinates: [125.32, 43.9] },
+  { id: 'cn-js', labelEn: 'Jiangsu', labelZh: '江苏', coordinates: [118.8, 32.06] },
+  { id: 'cn-jx', labelEn: 'Jiangxi', labelZh: '江西', coordinates: [115.86, 28.68] },
+  { id: 'cn-ln', labelEn: 'Liaoning', labelZh: '辽宁', coordinates: [123.43, 41.8] },
+  { id: 'cn-mo', labelEn: 'Macao', labelZh: '澳门', coordinates: [113.54, 22.2] },
+  { id: 'cn-nm', labelEn: 'Inner Mongolia', labelZh: '内蒙古', coordinates: [111.75, 40.84] },
+  { id: 'cn-nx', labelEn: 'Ningxia', labelZh: '宁夏', coordinates: [106.23, 38.49] },
+  { id: 'cn-qh', labelEn: 'Qinghai', labelZh: '青海', coordinates: [101.78, 36.62] },
+  { id: 'cn-sc', labelEn: 'Sichuan', labelZh: '四川', coordinates: [104.07, 30.67] },
+  { id: 'cn-sd', labelEn: 'Shandong', labelZh: '山东', coordinates: [117.12, 36.65] },
+  { id: 'cn-sh', labelEn: 'Shanghai', labelZh: '上海', coordinates: [121.47, 31.23] },
+  { id: 'cn-sn', labelEn: 'Shaanxi', labelZh: '陕西', coordinates: [108.94, 34.26] },
+  { id: 'cn-sx', labelEn: 'Shanxi', labelZh: '山西', coordinates: [112.55, 37.87] },
+  { id: 'cn-tj', labelEn: 'Tianjin', labelZh: '天津', coordinates: [117.2, 39.08] },
+  { id: 'cn-tw', labelEn: 'Taiwan', labelZh: '台湾', coordinates: [121.0, 23.7] },
+  { id: 'cn-xj', labelEn: 'Xinjiang', labelZh: '新疆', coordinates: [87.62, 43.82] },
+  { id: 'cn-xz', labelEn: 'Tibet', labelZh: '西藏', coordinates: [91.12, 29.65] },
+  { id: 'cn-yn', labelEn: 'Yunnan', labelZh: '云南', coordinates: [102.71, 25.04] },
+  { id: 'cn-zj', labelEn: 'Zhejiang', labelZh: '浙江', coordinates: [120.15, 30.27] },
 ] as const;
 
-const countryToRegion = new Map(
-  visitorRegions.flatMap((region) => region.countries.map((country) => [country, region.id] as const))
-);
+const chineseLocationById = new Map(chineseLocations.map((location) => [location.id, location]));
 
 const topology = worldAtlas as unknown as Parameters<typeof feature>[0];
 const geography = feature(topology, topology.objects.countries);
@@ -194,14 +93,135 @@ const projection = geoNaturalEarth1().translate([360, 174]).scale(126);
 const pathGenerator = geoPath(projection);
 const graticulePath = pathGenerator(geoGraticule10());
 
-function counterUrl(regionId: string, increment = false) {
-  const params = new URLSearchParams({
-    behavior: 'vote',
-    startNumber: String(migratedCounts[regionId] ?? 0),
-  });
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
+const countryNameAliases: Readonly<Record<string, string>> = {
+  'antigua-barbuda': 'antigua-and-barb',
+  'bosnia-herzegovina': 'bosnia-and-herz',
+  'bosnia-and-herzegovina': 'bosnia-and-herz',
+  'cape-verde': 'cabo-verde',
+  'central-african-republic': 'central-african-rep',
+  'congo-brazzaville': 'congo',
+  'congo-kinshasa': 'dem-rep-congo',
+  'democratic-republic-of-the-congo': 'dem-rep-congo',
+  'dominican-republic': 'dominican-rep',
+  'equatorial-guinea': 'eq-guinea',
+  'falkland-islands': 'falkland-is',
+  'myanmar-burma': 'myanmar',
+  'north-macedonia': 'macedonia',
+  'palestinian-territories': 'palestine',
+  'sao-tome-principe': 'sao-tome-and-principe',
+  'solomon-islands': 'solomon-is',
+  'south-sudan': 's-sudan',
+  'st-vincent-grenadines': 'st-vin-and-gren',
+  'timor-leste': 'east-timor',
+  'trinidad-tobago': 'trinidad-and-tobago',
+  'turkiye': 'turkey',
+  'united-states': 'united-states-of-america',
+  'vatican-city': 'vatican',
+  'western-sahara': 'w-sahara',
+};
+
+// The compact 110 m basemap omits several small countries. Their fixed country
+// centroids keep those visits visible without loading a much larger map bundle.
+const countryCoordinateFallbacks: Readonly<Record<string, [number, number]>> = {
+  AD: [1.5606, 42.542],
+  AI: [-63.066, 18.2243],
+  AN: [-68.9721, 12.1957],
+  AS: [-170.7179, -14.3046],
+  AW: [-69.9827, 12.521],
+  BB: [-59.5602, 13.1811],
+  BH: [50.5425, 26.0417],
+  BL: [-62.841, 17.8988],
+  BM: [-64.7558, 32.3131],
+  CW: [-68.9721, 12.1957],
+  DM: [-61.3576, 15.4394],
+  FM: [153.2966, 7.5361],
+  GD: [-61.6818, 12.1174],
+  GG: [-2.5726, 49.4678],
+  GU: [144.767, 13.4406],
+  IM: [-4.5388, 54.224],
+  JE: [-2.1272, 49.2181],
+  KI: [-167.9217, 0.893],
+  KM: [43.6844, -11.879],
+  LI: [9.5357, 47.1367],
+  MC: [7.4073, 43.7526],
+  MF: [-63.0599, 18.0888],
+  MS: [-62.1856, 16.7404],
+  MT: [14.405, 35.9215],
+  MU: [57.5714, -20.2779],
+  MV: [73.4573, 3.7316],
+  NF: [167.9497, -29.0516],
+  NR: [166.9326, -0.5189],
+  NU: [-169.8704, -19.0489],
+  PW: [134.4056, 7.286],
+  SC: [55.476, -4.6601],
+  SG: [103.817, 1.359],
+  SM: [12.4594, 43.9415],
+  SX: [-63.0572, 18.0509],
+  TO: [-174.7998, -20.4161],
+  WS: [-172.1649, -13.7536],
+};
+
+const countryFeatureBySlug = new Map(
+  countries.flatMap((country) => {
+    const name = country.properties?.name;
+    return typeof name === 'string' ? [[slugify(name), country] as const] : [];
+  })
+);
+const countryNamesEn = new Intl.DisplayNames(['en'], { type: 'region' });
+const countryNamesZh = new Intl.DisplayNames(['zh-CN'], { type: 'region' });
+
+function buildCountryLocations() {
+  const locations = new Map<string, VisitorLocation>();
+
+  for (let first = 65; first <= 90; first += 1) {
+    for (let second = 65; second <= 90; second += 1) {
+      const code = String.fromCharCode(first, second);
+      const displayName = countryNamesEn.of(code);
+      if (!displayName || displayName === code) continue;
+
+      const displaySlug = slugify(displayName);
+      const atlasSlug = countryNameAliases[displaySlug] ?? displaySlug;
+      const country = countryFeatureBySlug.get(atlasSlug);
+      const coordinates = country
+        ? geoCentroid(country) as [number, number]
+        : countryCoordinateFallbacks[code];
+      if (!coordinates) continue;
+
+      locations.set(`country-${code.toLowerCase()}`, {
+        id: `country-${code.toLowerCase()}`,
+        labelEn: displayName,
+        labelZh: countryNamesZh.of(code) ?? displayName,
+        coordinates,
+      });
+    }
+  }
+
+  return locations;
+}
+
+const countryLocationById = buildCountryLocations();
+
+function isLocationId(value: string) {
+  return /^cn-[a-z]{2}$/.test(value) || /^country-[a-z]{2}$/.test(value);
+}
+
+function resolveLocation(id: string) {
+  return chineseLocationById.get(id) ?? countryLocationById.get(id) ?? null;
+}
+
+function counterUrl(locationId: string, increment = false) {
+  const params = new URLSearchParams();
   if (!increment) params.set('readOnly', 'true');
-  return `${counterBaseUrl}/${regionId}?${params.toString()}`;
+  return `${counterBaseUrl}/${locationId}?${params.toString()}`;
 }
 
 function readCount(payload: unknown): number | null {
@@ -212,7 +232,7 @@ function readCount(payload: unknown): number | null {
   return Number.isFinite(parsed) ? Math.max(0, parsed) : null;
 }
 
-async function fetchJson(url: string, keepalive = false): Promise<unknown> {
+async function fetchResponse(url: string, keepalive = false) {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), requestTimeout);
 
@@ -223,7 +243,7 @@ async function fetchJson(url: string, keepalive = false): Promise<unknown> {
       keepalive,
     });
     if (!response.ok) throw new Error(`Request failed with ${response.status}`);
-    return await response.json();
+    return response;
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -233,12 +253,12 @@ function wait(delay: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, delay));
 }
 
-async function fetchJsonWithRetry(url: string, attempts = 2, keepalive = false): Promise<unknown> {
+async function withRetry<T>(request: () => Promise<T>, attempts = 2): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
-      return await fetchJson(url, keepalive);
+      return await request();
     } catch (error) {
       lastError = error;
       if (attempt < attempts - 1) await wait(450 * (attempt + 1));
@@ -248,54 +268,106 @@ async function fetchJsonWithRetry(url: string, attempts = 2, keepalive = false):
   throw lastError instanceof Error ? lastError : new Error('Unable to load visitor data');
 }
 
-async function getRegionCount(regionId: string): Promise<RegionCountResult> {
-  try {
-    const count = readCount(await fetchJsonWithRetry(counterUrl(regionId)));
-    if (count === null) throw new Error('Invalid region count');
-    return { id: regionId, count, succeeded: true };
-  } catch {
-    return { id: regionId, count: 0, succeeded: false };
-  }
+function parseLocationCounts(html: string) {
+  const documentNode = new DOMParser().parseFromString(html, 'text/html');
+  const counts: Record<string, number> = {};
+
+  documentNode.querySelectorAll('table tr').forEach((row) => {
+    const link = Array.from(row.querySelectorAll<HTMLAnchorElement>('a[href]')).find((anchor) =>
+      anchor.getAttribute('href')?.startsWith(`/stats/${counterNamespace}/${counterAction}/`)
+    );
+    if (!link) return;
+
+    const href = link.getAttribute('href') ?? '';
+    const locationId = decodeURIComponent(href.split('/').filter(Boolean).at(-1) ?? '');
+    if (!isLocationId(locationId)) return;
+
+    const cells = row.querySelectorAll('td');
+    const countText = cells.item(2)?.textContent ?? '';
+    const parsed = Number(countText.replace(/[^0-9]/g, ''));
+    if (Number.isFinite(parsed)) counts[locationId] = Math.max(0, parsed);
+  });
+
+  return counts;
 }
 
-async function loadRegionCounts(): Promise<RegionCountResult[]> {
-  const results: RegionCountResult[] = [];
-
-  for (let index = 0; index < visitorRegions.length; index += maxConcurrentReads) {
-    const batch = visitorRegions.slice(index, index + maxConcurrentReads);
-    results.push(...(await Promise.all(batch.map((region) => getRegionCount(region.id)))));
-  }
-
-  return results;
+async function loadLocationCounts() {
+  return withRetry(async () => {
+    const response = await fetchResponse(`${counterStatsUrl}?sort=top`);
+    return parseLocationCounts(await response.text());
+  });
 }
 
-async function incrementRegion(regionId: string): Promise<number | null> {
+async function incrementLocation(locationId: string): Promise<number | null> {
   try {
-    return readCount(await fetchJsonWithRetry(counterUrl(regionId, true), 3, true));
+    return await withRetry(async () => {
+      const payload = await (await fetchResponse(counterUrl(locationId, true), true)).json();
+      const count = readCount(payload);
+      if (count === null) throw new Error('Invalid location count');
+      return count;
+    }, 3);
   } catch {
     return null;
   }
 }
 
-async function getCurrentRegion(): Promise<string | null> {
+function fallbackCountryLocation(payload: IpWhoPayload, code: string): VisitorLocation | null {
+  const latitude = Number(payload.latitude);
+  const longitude = Number(payload.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+  const labelEn = typeof payload.country === 'string' ? payload.country : code;
+  return {
+    id: `country-${code.toLowerCase()}`,
+    labelEn,
+    labelZh: countryNamesZh.of(code) ?? labelEn,
+    coordinates: [longitude, latitude],
+  };
+}
+
+async function getCurrentLocation(): Promise<VisitorLocation | null> {
   try {
-    const payload = (await fetchJson(countryLookupUrl)) as { country?: unknown };
-    const country = typeof payload.country === 'string' ? payload.country.toUpperCase() : '';
-    return countryToRegion.get(country) ?? null;
+    const payload = (await (await fetchResponse(countryLookupUrl)).json()) as IpWhoPayload;
+    if (payload.success === false) return null;
+
+    const countryCode = typeof payload.country_code === 'string'
+      ? payload.country_code.toUpperCase()
+      : '';
+
+    if (countryCode === 'CN') {
+      const regionCode = typeof payload.region_code === 'string'
+        ? payload.region_code.toLowerCase()
+        : '';
+      return chineseLocationById.get(`cn-${regionCode}`) ?? null;
+    }
+
+    const chineseSpecialRegion: Readonly<Record<string, string>> = {
+      HK: 'cn-hk',
+      MO: 'cn-mo',
+      TW: 'cn-tw',
+    };
+    const chineseSpecialId = chineseSpecialRegion[countryCode];
+    if (chineseSpecialId) return chineseLocationById.get(chineseSpecialId) ?? null;
+    if (!/^[A-Z]{2}$/.test(countryCode)) return null;
+
+    return countryLocationById.get(`country-${countryCode.toLowerCase()}`)
+      ?? fallbackCountryLocation(payload, countryCode);
   } catch {
     return null;
   }
 }
 
-function readCachedCounts(): RegionCache | null {
+function readCachedCounts(): LocationCache | null {
   try {
-    const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '') as Partial<RegionCache>;
+    const cached = JSON.parse(localStorage.getItem(cacheKey) ?? '') as Partial<LocationCache>;
     if (!cached.counts || typeof cached.counts !== 'object') return null;
 
     const counts = Object.fromEntries(
-      visitorRegions.map((region) => {
-        const value = Number(cached.counts?.[region.id]);
-        return [region.id, Number.isFinite(value) ? Math.max(0, value) : 0];
+      Object.entries(cached.counts).flatMap(([id, value]) => {
+        const parsed = Number(value);
+        return isLocationId(id) && Number.isFinite(parsed)
+          ? [[id, Math.max(0, parsed)] as const]
+          : [];
       })
     );
     return { counts, savedAt: Number(cached.savedAt) || 0 };
@@ -306,7 +378,7 @@ function readCachedCounts(): RegionCache | null {
 
 function writeCachedCounts(counts: Record<string, number>) {
   try {
-    const cached: RegionCache = { counts, savedAt: Date.now() };
+    const cached: LocationCache = { counts, savedAt: Date.now() };
     localStorage.setItem(cacheKey, JSON.stringify(cached));
   } catch {
     // The live map remains usable when browser storage is unavailable.
@@ -338,13 +410,13 @@ export default function VisitorMap() {
   const locale = useLocaleStore((state) => state.locale);
   const isChinese = locale === 'zh';
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [currentRegionId, setCurrentRegionId] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<VisitorLocation | null>(null);
   const [status, setStatus] = useState<MapStatus>('loading');
 
   useEffect(() => {
     let cancelled = false;
     let syncing = false;
-    let resolvedRegionId: string | null | undefined;
+    let resolvedLocation: VisitorLocation | null | undefined;
     const initialCache = readCachedCounts();
 
     if (initialCache) {
@@ -357,26 +429,26 @@ export default function VisitorMap() {
       syncing = true;
 
       try {
-        const loadedCountsPromise = loadRegionCounts();
-        const regionId = resolvedRegionId === undefined
-          ? await getCurrentRegion()
-          : resolvedRegionId;
+        const loadedCountsPromise = loadLocationCounts();
+        const location = resolvedLocation === undefined
+          ? await getCurrentLocation()
+          : resolvedLocation;
 
         if (cancelled) return;
-        if (regionId !== null) resolvedRegionId = regionId;
-        setCurrentRegionId(regionId);
+        if (location !== null) resolvedLocation = location;
+        setCurrentLocation(location);
 
         const latestCache = readCachedCounts();
         const nextCounts: Record<string, number> = { ...(latestCache?.counts ?? {}) };
         let liveRequestSucceeded = false;
 
-        if (regionId && shouldTrackVisit() && !hasCountedThisSession()) {
-          const incrementedCount = await incrementRegion(regionId);
+        if (location && shouldTrackVisit() && !hasCountedThisSession()) {
+          const incrementedCount = await incrementLocation(location.id);
           if (cancelled) return;
 
           if (incrementedCount !== null) {
             markSessionAsCounted();
-            nextCounts[regionId] = Math.max(nextCounts[regionId] ?? 0, incrementedCount);
+            nextCounts[location.id] = Math.max(nextCounts[location.id] ?? 0, incrementedCount);
             liveRequestSucceeded = true;
           }
         }
@@ -387,14 +459,17 @@ export default function VisitorMap() {
           setStatus('ready');
         }
 
-        const loadedCounts = await loadedCountsPromise;
-        if (cancelled) return;
+        try {
+          const loadedCounts = await loadedCountsPromise;
+          if (cancelled) return;
 
-        loadedCounts.forEach((result) => {
-          if (!result.succeeded) return;
-          nextCounts[result.id] = Math.max(nextCounts[result.id] ?? 0, result.count);
+          Object.entries(loadedCounts).forEach(([id, count]) => {
+            nextCounts[id] = Math.max(nextCounts[id] ?? 0, count);
+          });
           liveRequestSucceeded = true;
-        });
+        } catch {
+          // Keep the most recently cached counts when the public statistics list is unavailable.
+        }
 
         if (liveRequestSucceeded) {
           writeCachedCounts(nextCounts);
@@ -423,34 +498,39 @@ export default function VisitorMap() {
     };
   }, []);
 
-  const visibleRegions = useMemo(
-    () =>
-      visitorRegions.filter(
-        (region) => (counts[region.id] ?? 0) > 0 || region.id === currentRegionId
-      ),
-    [counts, currentRegionId]
-  );
+  const visibleLocations = useMemo(() => {
+    const locations = new Map<string, VisitorLocation>();
+
+    Object.entries(counts).forEach(([id, count]) => {
+      const location = count > 0 ? resolveLocation(id) : null;
+      if (location) locations.set(id, location);
+    });
+    if (currentLocation) locations.set(currentLocation.id, currentLocation);
+
+    return Array.from(locations.values());
+  }, [counts, currentLocation]);
+
   const totalMappedVisits = useMemo(
-    () => visitorRegions.reduce((total, region) => total + (counts[region.id] ?? 0), 0),
-    [counts]
+    () => visibleLocations.reduce((total, location) => total + (counts[location.id] ?? 0), 0),
+    [counts, visibleLocations]
   );
 
   const statusText =
     status === 'loading'
       ? isChinese
-        ? '正在同步访客区域…'
-        : 'Syncing visitor regions…'
+        ? '正在同步访客地区…'
+        : 'Syncing visitor locations…'
       : status === 'stale'
         ? isChinese
           ? '正在显示上次成功获取的数据'
           : 'Showing the last successfully loaded data'
         : status === 'unavailable'
           ? isChinese
-            ? '区域统计暂时不可用，地图仍可正常显示'
-            : 'Regional statistics are temporarily unavailable; the map remains available'
+            ? '地区统计暂时不可用，地图仍可正常显示'
+            : 'Location statistics are temporarily unavailable; the map remains available'
           : isChinese
-            ? `${visibleRegions.length} 个访问区域 · ${totalMappedVisits} 次已记录访问`
-            : `${visibleRegions.length} visitor regions · ${totalMappedVisits} mapped visits`;
+            ? `${visibleLocations.length} 个访问地区 · ${totalMappedVisits} 次已记录访问`
+            : `${visibleLocations.length} visitor locations · ${totalMappedVisits} mapped visits`;
 
   return (
     <section className="flex h-full min-h-[320px] flex-col rounded-xl border border-neutral-200 bg-neutral-50 p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
@@ -460,7 +540,7 @@ export default function VisitorMap() {
         </h3>
         <span className="inline-flex items-center gap-1 text-[11px] text-neutral-500 dark:text-neutral-400">
           <MapIcon className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-          {isChinese ? '匿名区域统计' : 'Anonymous regional stats'}
+          {isChinese ? '匿名地区统计' : 'Anonymous location stats'}
         </span>
       </div>
 
@@ -468,7 +548,7 @@ export default function VisitorMap() {
         <svg
           viewBox="0 0 720 348"
           role="img"
-          aria-label={isChinese ? '带有访客区域红点的世界地图' : 'World map with visitor-region markers'}
+          aria-label={isChinese ? '带有访客地区红点的世界地图' : 'World map with visitor-location markers'}
           className="h-full min-h-[222px] w-full"
           preserveAspectRatio="xMidYMid meet"
         >
@@ -489,17 +569,17 @@ export default function VisitorMap() {
             ))}
           </g>
 
-          {visibleRegions.map((region) => {
-            const point = projection(region.coordinates);
+          {visibleLocations.map((location) => {
+            const point = projection(location.coordinates);
             if (!point) return null;
 
-            const count = counts[region.id] ?? 0;
-            const isCurrent = region.id === currentRegionId;
+            const count = counts[location.id] ?? 0;
+            const isCurrent = location.id === currentLocation?.id;
             const radius = Math.min(7, 3.5 + Math.log2(Math.max(1, count)) * 0.65);
-            const label = isChinese ? region.labelZh : region.labelEn;
+            const label = isChinese ? location.labelZh : location.labelEn;
 
             return (
-              <g key={region.id} transform={`translate(${point[0]} ${point[1]})`}>
+              <g key={location.id} transform={`translate(${point[0]} ${point[1]})`}>
                 {isCurrent && (
                   <circle
                     r={radius + 5}
@@ -522,7 +602,7 @@ export default function VisitorMap() {
           })}
         </svg>
 
-        {status === 'loading' && visibleRegions.length === 0 && (
+        {status === 'loading' && visibleLocations.length === 0 && (
           <div className="pointer-events-none absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/25 to-transparent dark:via-slate-700/10" />
         )}
       </div>
@@ -531,8 +611,8 @@ export default function VisitorMap() {
         <p role="status" aria-live="polite">{statusText}</p>
         <p>
           {isChinese
-            ? '红点仅表示国家级近似区域，不保存或展示访客 IP'
-            : 'Dots show country-level approximations; visitor IPs are neither stored nor displayed'}
+            ? '国内按省级、海外按国家级近似显示；不保存或展示访客 IP'
+            : 'China is shown by province and overseas visits by country; visitor IPs are neither stored nor displayed'}
           {' · '}
           <a
             href="https://www.naturalearthdata.com/"
