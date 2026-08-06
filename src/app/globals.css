@@ -196,6 +196,12 @@ body {
   text-wrap: pretty;
 }
 
+.academic-metric-number {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+
 /* Glass morphism utilities */
 .glass {
   background: var(--glass-bg);
